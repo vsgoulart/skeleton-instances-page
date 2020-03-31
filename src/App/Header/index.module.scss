@@ -1,0 +1,41 @@
+.nav {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.logo {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.links {
+  display: flex;
+  margin: 0;
+  list-style: none;
+}
+
+.linkContainer {
+  padding: 5px;
+
+  &:first-of-type {
+    padding-left: 0;
+  }
+
+  &:last-of-type {
+    padding-left: 0;
+  }
+}
+
+.link:link,
+.link:visited,
+.link:focus,
+.link:hover,
+.link:active {
+  color: #333;
+  text-decoration: none;
+
+  &.activeLink {
+    text-decoration: underline;
+  }
+}
