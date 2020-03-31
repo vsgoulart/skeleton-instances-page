@@ -45,7 +45,9 @@ function Header() {
             isActive={(match, location) => {
               const searchParams = new URLSearchParams(location.search);
 
-              return match !== null && searchParams.get('incidents') === 'true';
+              return (
+                match !== null && searchParams.get('incidents') === 'true' && searchParams.get('active') !== 'true'
+              );
             }}
             className={classNames.link}
             activeClassName={classNames.activeLink}
