@@ -6,7 +6,7 @@ import classNames from './index.module.scss';
 
 function Header() {
   return (
-    <nav className={classNames.nav}>
+    <nav className={classNames.header}>
       <Link to="/" className={cns(classNames.logo, classNames.link)}>
         Camunda Operate
       </Link>

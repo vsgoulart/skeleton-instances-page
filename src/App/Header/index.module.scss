@@ -1,7 +1,10 @@
-.nav {
+.header {
   display: flex;
   flex-direction: row;
   align-items: center;
+  height: 60px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .logo {
