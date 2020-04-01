@@ -1,14 +1,23 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {useLocation, useHistory} from 'react-router-dom';
 
 import classNames from './index.module.scss';
-import {WORKFLOWS} from './mocks';
+import {ENDPOINTS} from '../../endpoints';
 
 const PARAMS = ['workflow', 'version', 'ids', 'errorMessage', 'startDate', 'endDate', 'active', 'incidents'];
 
 function Filters() {
   const {workflow, version, ids, errorMessage, startDate, endDate, active, incidents} = useSearchParams(PARAMS);
   const history = useHistory();
+  const [workflows, setWorkflows] = useState([]);
+
+  useEffect(() => {
+    async function fetchWorkflows() {
+      setWorkflows(await fetch(ENDPOINTS.workflows).then(response => response.json()));
+    }
+
+    fetchWorkflows();
+  }, []);
 
   function updateParam(name, value) {
     const searchParams = new URLSearchParams(window.location.search);
@@ -36,9 +45,10 @@ function Filters() {
           onChange={event => {
             updateParam('workflow', event.target.value);
           }}
+          disabled={workflows.length === 0}
         >
           <option value="">Select a value</option>
-          {WORKFLOWS.map(({bpmnProcessId, name}) => (
+          {workflows.map(({bpmnProcessId, name}) => (
             <option key={bpmnProcessId} value={bpmnProcessId}>
               {name || bpmnProcessId}
             </option>
@@ -54,10 +64,10 @@ function Filters() {
           onChange={event => {
             updateParam('version', event.target.value);
           }}
-          disabled={workflow === ''}
+          disabled={workflow === '' && workflows.length === 0}
         >
           <option value="">Select a value</option>
-          {getVersions(WORKFLOWS, workflow).map(({id, version}) => (
+          {getVersions(workflows, workflow).map(({id, version}) => (
             <option key={id}>{version}</option>
           ))}
         </select>

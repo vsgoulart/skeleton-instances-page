@@ -44,5 +44,6 @@
     "koa-logger": "^3.2.1",
     "nodemon": "^2.0.2",
     "uuid": "^7.0.3"
-  }
+  },
+  "proxy": "http://localhost:8080"
 }
