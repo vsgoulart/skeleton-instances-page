@@ -19,6 +19,7 @@ function operationFactory(type, instancesCount) {
     instancesCount,
     operationsTotalCount: instancesCount,
     operationsFinishedCount: 0,
+    sortValues: [9223372036854775807, Date.now()],
   };
 }
 
