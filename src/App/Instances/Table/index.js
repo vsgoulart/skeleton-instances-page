@@ -1,18 +1,48 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 
 import classNames from './index.module.scss';
-import {INSTANCES} from './mocks';
 import {Pagination} from './Pagination';
+import {useStores} from '../../../hooks/useStores';
+import {observer} from 'mobx-react';
+import {createOperation, fetchOperations, fetchWorkflowInstances, fetchStatistics} from '../../api';
 
 const STATE = Object.freeze({
   ACTIVE: 'ACTIVE',
   INCIDENT: 'INCIDENT',
 });
 
-function Table() {
+const Table = observer(() => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [areAllIdsSelected, setAreAllIdsSelected] = useState(false);
-  const {workflowInstances, totalCount} = INSTANCES;
+  const {filterStore, instancesStore, operationsStore, statisticsStore} = useStores();
+  const {workflowInstances, totalCount} = instancesStore.state;
+
+  useEffect(() => {
+    const loadWorkflowInstances = async () => {
+      const instances = await fetchWorkflowInstances(filterStore.searchParams);
+      instancesStore.setInstances(instances);
+    };
+
+    loadWorkflowInstances();
+
+    return () => {
+      instancesStore.reset();
+    };
+  }, [filterStore, instancesStore]);
+
+  const handleClick = (instanceId, operationType) => async () => {
+    await createOperation(instanceId, operationType);
+
+    const [operations, instances, count] = await Promise.all([
+      fetchOperations(),
+      fetchWorkflowInstances(filterStore.searchParams),
+      fetchStatistics(),
+    ]);
+
+    operationsStore.setOperations(operations);
+    instancesStore.setInstances(instances);
+    statisticsStore.setCount(count);
+  };
 
   return (
     <>
@@ -63,8 +93,14 @@ function Table() {
               <td>{startDate}</td>
               <td>{endDate}</td>
               <td>
-                {STATE.INCIDENT === state && <button type="button">Retry</button>}
-                <button type="button">Cancel</button>
+                {STATE.INCIDENT === state && (
+                  <button type="button" onClick={handleClick(id, 'RESOLVE_INCIDENT')}>
+                    Retry
+                  </button>
+                )}
+                <button type="button" onClick={handleClick(id, 'CANCEL_WORKFLOW_INSTANCE')}>
+                  Cancel
+                </button>
               </td>
             </tr>
           ))}
@@ -86,6 +122,6 @@ function Table() {
       </div>
     </>
   );
-}
+});
 
 export {Table};

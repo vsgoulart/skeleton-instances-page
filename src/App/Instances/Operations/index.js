@@ -1,13 +1,25 @@
-import React from 'react';
-
+import React, {useEffect} from 'react';
+import {observer} from 'mobx-react';
 import classNames from './index.module.scss';
-import {OPERATIONS} from './mocks';
 
-function Operations() {
+import {fetchOperations} from '../../api';
+import {useStores} from '../../../hooks/useStores';
+
+const Operations = observer(() => {
+  const {operationsStore} = useStores();
+  const {operations} = operationsStore.state;
+
+  useEffect(() => {
+    const loadOperations = async () => {
+      operationsStore.setOperations(await fetchOperations());
+    };
+    loadOperations();
+  }, [operationsStore]);
+
   return (
     <div className={classNames.operations}>
       <h2>Operations</h2>
-      {OPERATIONS.map(({id, startDate, endDate, operationsFinishedCount, operationsTotalCount}) => (
+      {operations.map(({id, startDate, endDate, operationsFinishedCount, operationsTotalCount}) => (
         <div key={id} className={classNames.operation}>
           <div>{id}</div>
           <div>{startDate}</div>
@@ -17,6 +29,6 @@ function Operations() {
       ))}
     </div>
   );
-}
+});
 
 export {Operations};

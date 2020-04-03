@@ -1,41 +1,43 @@
 import React, {useEffect, useState} from 'react';
-import {useLocation, useHistory} from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
+import {observer} from 'mobx-react';
 
 import classNames from './index.module.scss';
-import {ENDPOINTS} from '../../endpoints';
+import {fetchWorkflows, fetchWorkflowInstances} from '../../api';
+import {useStores} from '../../../hooks/useStores';
 
-const PARAMS = ['workflow', 'version', 'ids', 'errorMessage', 'startDate', 'endDate', 'active', 'incidents'];
-
-function Filters() {
-  const {workflow, version, ids, errorMessage, startDate, endDate, active, incidents} = useSearchParams(PARAMS);
+const Filters = observer(() => {
   const history = useHistory();
   const [workflows, setWorkflows] = useState([]);
+  const {filterStore, instancesStore} = useStores();
+  const {workflow, version, ids, errorMessage, startDate, endDate, active, incidents} = filterStore.state;
 
   useEffect(() => {
-    async function fetchWorkflows() {
-      setWorkflows(await fetch(ENDPOINTS.workflows).then(response => response.json()));
+    async function loadWorkflows() {
+      setWorkflows(await fetchWorkflows());
     }
+    loadWorkflows();
 
-    fetchWorkflows();
-  }, []);
+    return () => {
+      filterStore.reset();
+    };
+  }, [filterStore]);
 
-  function updateParam(name, value) {
-    const searchParams = new URLSearchParams(window.location.search);
-
-    if (value === '' || value === false) {
-      searchParams.delete(name);
-    } else {
-      searchParams.set(name, value);
-    }
-
-    history.push({search: searchParams.toString()});
-  }
+  useEffect(() => {
+    const update = async () => {
+      history.push({search: filterStore.searchParams});
+      const instances = await fetchWorkflowInstances(filterStore.searchParams);
+      instancesStore.setInstances(instances);
+    };
+    update();
+  }, [instancesStore, filterStore.searchParams, history]);
 
   return (
     <div className={classNames.filters}>
       <h2>
-        Filters <span>0</span>
+        Filters <span>{instancesStore.state.totalCount}</span>
       </h2>
+
       <label htmlFor="workflow" className={classNames.label}>
         <span className={classNames.labelText}>Workflow</span>
         <select
@@ -43,7 +45,7 @@ function Filters() {
           id="workflow"
           value={workflow}
           onChange={event => {
-            updateParam('workflow', event.target.value);
+            filterStore.setFilter('workflow', event.target.value);
           }}
           disabled={workflows.length === 0}
         >
@@ -62,7 +64,7 @@ function Filters() {
           id="version"
           value={version}
           onChange={event => {
-            updateParam('version', event.target.value);
+            filterStore.setFilter('version', event.target.value);
           }}
           disabled={workflow === '' && workflows.length === 0}
         >
@@ -79,7 +81,7 @@ function Filters() {
           id="ids"
           value={ids}
           onChange={event => {
-            updateParam('ids', event.target.value);
+            filterStore.setFilter('ids', event.target.value);
           }}
         />
       </label>
@@ -91,7 +93,7 @@ function Filters() {
           id="errorMessage"
           value={errorMessage}
           onChange={event => {
-            updateParam('errorMessage', event.target.value);
+            filterStore.setFilter('errorMessage', event.target.value);
           }}
         />
       </label>
@@ -103,7 +105,7 @@ function Filters() {
           id="startDate"
           value={startDate}
           onChange={event => {
-            updateParam('startDate', event.target.value);
+            filterStore.setFilter('startDate', event.target.value);
           }}
         />
       </label>
@@ -115,7 +117,7 @@ function Filters() {
           id="endDate"
           value={endDate}
           onChange={event => {
-            updateParam('endDate', event.target.value);
+            filterStore.setFilter('endDate', event.target.value);
           }}
         />
       </label>
@@ -127,7 +129,7 @@ function Filters() {
           id="active"
           checked={active ?? false}
           onChange={event => {
-            updateParam('active', event.target.checked);
+            filterStore.setFilter('active', event.target.checked);
           }}
         />
       </label>
@@ -139,38 +141,13 @@ function Filters() {
           id="incidents"
           checked={incidents ?? false}
           onChange={event => {
-            updateParam('incidents', event.target.checked);
+            filterStore.setFilter('incidents', event.target.checked);
           }}
         />
       </label>
     </div>
   );
-}
-
-function useSearchParams(params) {
-  const searchParams = new URLSearchParams(useLocation().search);
-
-  return params.reduce((accumulator, param) => {
-    if (searchParams.get(param) === 'true') {
-      return {
-        ...accumulator,
-        [param]: true,
-      };
-    }
-
-    if (searchParams.get(param) === 'false') {
-      return {
-        ...accumulator,
-        [param]: false,
-      };
-    }
-
-    return {
-      ...accumulator,
-      [param]: searchParams.get(param) ?? '',
-    };
-  }, {});
-}
+});
 
 function getVersions(workflows, id) {
   const workflow = workflows.find(({bpmnProcessId}) => bpmnProcessId === id);
