@@ -3,9 +3,12 @@ start.
 
 ## Expectations
 
-- Instances List API request: the query URL should be ok, no need to return filtered instances
-- When changing the filter or applying operations, the statistics endpoint and instances endpoints should be called
-- Polling Operations and Instances Table should work, correct state need to be shown
+- On first load workflows, instances statistics, instances and operations should be loaded
+- Every filter field change should update the URL and trigger instances and statics refetch
+- Changes on filter won't affect the endpoint for the sake of time, but instances request should have the proper body
+- When instances are fetched we should start polling if there is any instance with active operations
+- Instances and operations should start polling when a single or batch operation is started
+- Instances and operations polling should be stopped as soon as there is no active operations anymore
 
 ## Comparison criteria
 
