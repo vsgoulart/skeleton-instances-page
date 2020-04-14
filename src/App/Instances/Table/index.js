@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import {useStore} from 'effector-react';
 import {createStoreObject} from 'effector';
-
+import {useLocation} from 'react-router-dom';
 import classNames from './index.module.scss';
 import {Pagination} from './Pagination';
 import {
@@ -35,10 +35,11 @@ const store = createStoreObject({
 
 function Table() {
   const {instances, isLoading, totalCount, areAllInstancesSelected, selectedInstances} = useStore(store);
+  const location = useLocation();
 
   useEffect(() => {
     fetchInstances();
-  }, []);
+  }, [location.search]);
 
   return (
     <>

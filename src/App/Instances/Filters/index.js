@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {useLocation, useHistory} from 'react-router-dom';
-
+import {useStore} from 'effector-react';
 import classNames from './index.module.scss';
 import {ENDPOINTS} from '../../../stores/endpoints';
+import {totalCount$} from '../../../stores/instances';
 
 const PARAMS = ['workflow', 'version', 'ids', 'errorMessage', 'startDate', 'endDate', 'active', 'incidents'];
 
@@ -10,6 +11,7 @@ function Filters() {
   const {workflow, version, ids, errorMessage, startDate, endDate, active, incidents} = useSearchParams(PARAMS);
   const history = useHistory();
   const [workflows, setWorkflows] = useState([]);
+  const totalFilterCount = useStore(totalCount$);
 
   useEffect(() => {
     async function fetchWorkflows() {
@@ -34,7 +36,7 @@ function Filters() {
   return (
     <div className={classNames.filters}>
       <h2>
-        Filters <span>0</span>
+        Filters <span>{totalFilterCount}</span>
       </h2>
       <label htmlFor="workflow" className={classNames.label}>
         <span className={classNames.labelText}>Workflow</span>
