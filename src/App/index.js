@@ -1,7 +1,7 @@
 import React from 'react';
 import {BrowserRouter, Switch, Route} from 'react-router-dom';
 
-import {Header} from './Header';
+import Header from './Header';
 import {Dashboard} from './Dashboard';
 import {Instances} from './Instances';
 import {Instance} from './Instance';

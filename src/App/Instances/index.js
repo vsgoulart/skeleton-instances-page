@@ -1,9 +1,9 @@
 import React from 'react';
 
-import {Filters} from './Filters';
+import Filters from './Filters';
 import {Modeler} from './Modeler';
-import {Table} from './Table';
-import {Operations} from './Operations';
+import Table from './Table';
+import Operations from './Operations';
 
 import classNames from './index.module.scss';
 

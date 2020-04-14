@@ -1,22 +1,34 @@
-import React from 'react';
+import React, {useEffect} from 'react';
+import {connect} from 'react-redux';
 
 import classNames from './index.module.scss';
-import {OPERATIONS} from './mocks';
+import {getBatchOperations} from '../../../actions';
 
-function Operations() {
+export function Operations({operations, getBatchOperations}) {
+  useEffect(() => {
+    getBatchOperations();
+  }, [getBatchOperations]);
+
   return (
     <div className={classNames.operations}>
       <h2>Operations</h2>
-      {OPERATIONS.map(({id, startDate, endDate, operationsFinishedCount, operationsTotalCount}) => (
-        <div key={id} className={classNames.operation}>
-          <div>{id}</div>
-          <div>{startDate}</div>
-          <div>{endDate || '-'}</div>
-          <div>{`${operationsFinishedCount} / ${operationsTotalCount}`}</div>
-        </div>
-      ))}
+      {operations &&
+        operations.map(({id, startDate, endDate, operationsFinishedCount, operationsTotalCount}) => (
+          <div data-testid={`operation-${id}`} key={id} className={classNames.operation}>
+            <div>{id}</div>
+            <div>{startDate}</div>
+            <div>{endDate || '-'}</div>
+            <div>{`${operationsFinishedCount} / ${operationsTotalCount}`}</div>
+          </div>
+        ))}
     </div>
   );
 }
 
-export {Operations};
+const mapStateToProps = (state, ownProps) => {
+  return {
+    operations: state.operations.operations,
+  };
+};
+
+export default connect(mapStateToProps, {getBatchOperations})(Operations);

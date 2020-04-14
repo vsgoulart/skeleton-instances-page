@@ -1,12 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import {useLocation, useHistory} from 'react-router-dom';
+import {connect} from 'react-redux';
 
 import classNames from './index.module.scss';
 import {ENDPOINTS} from '../../endpoints';
 
+import {getWorkflowInstances} from '../../../actions';
 const PARAMS = ['workflow', 'version', 'ids', 'errorMessage', 'startDate', 'endDate', 'active', 'incidents'];
 
-function Filters() {
+function Filters({totalInstanceCount, getWorkflowInstances}) {
   const {workflow, version, ids, errorMessage, startDate, endDate, active, incidents} = useSearchParams(PARAMS);
   const history = useHistory();
   const [workflows, setWorkflows] = useState([]);
@@ -29,12 +31,13 @@ function Filters() {
     }
 
     history.push({search: searchParams.toString()});
+    getWorkflowInstances();
   }
 
   return (
     <div className={classNames.filters}>
       <h2>
-        Filters <span>0</span>
+        Filters <span>{totalInstanceCount}</span>
       </h2>
       <label htmlFor="workflow" className={classNames.label}>
         <span className={classNames.labelText}>Workflow</span>
@@ -179,3 +182,9 @@ function getVersions(workflows, id) {
 }
 
 export {Filters};
+const mapStateToProps = (state, ownProps) => {
+  return {
+    totalInstanceCount: state.instances.totalCount,
+  };
+};
+export default connect(mapStateToProps, {getWorkflowInstances})(Filters);
