@@ -1,13 +1,28 @@
-import React from 'react';
+import React, {useEffect} from 'react';
+import {useStore} from 'effector-react';
+import {createStoreObject} from 'effector';
 
 import classNames from './index.module.scss';
-import {OPERATIONS} from './mocks';
+import {operations$, fetchOperations, isLoading$} from '../../../stores/operations';
+
+const store = createStoreObject({
+  operations: operations$,
+  isLoading: isLoading$,
+});
 
 function Operations() {
-  return (
+  const {operations, isLoading} = useStore(store);
+
+  useEffect(() => {
+    fetchOperations();
+  }, []);
+
+  return isLoading ? (
+    'loading'
+  ) : (
     <div className={classNames.operations}>
       <h2>Operations</h2>
-      {OPERATIONS.map(({id, startDate, endDate, operationsFinishedCount, operationsTotalCount}) => (
+      {operations.map(({id, startDate, endDate, operationsFinishedCount, operationsTotalCount}) => (
         <div key={id} className={classNames.operation}>
           <div>{id}</div>
           <div>{startDate}</div>

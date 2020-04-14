@@ -1,10 +1,18 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Link, NavLink} from 'react-router-dom';
 import cns from 'classnames';
+import {useStore} from 'effector-react';
 
 import classNames from './index.module.scss';
+import {statistics$, fetchStatistics} from '../../stores/statistics';
 
 function Header() {
+  const {running, active, withIncidents} = useStore(statistics$);
+
+  useEffect(() => {
+    fetchStatistics();
+  }, []);
+
   return (
     <nav className={classNames.header}>
       <Link to="/" className={cns(classNames.logo, classNames.link)}>
@@ -30,12 +38,12 @@ function Header() {
             className={classNames.link}
             activeClassName={classNames.activeLink}
           >
-            Running Instances <span>0</span>
+            Running Instances <span>{running}</span>
           </NavLink>
         </li>
         <li className={classNames.linkContainer}>
           <NavLink to="/instances" exact className={classNames.link} activeClassName={classNames.activeLink}>
-            Filters <span>0</span>
+            Filters <span>{active}</span>
           </NavLink>
         </li>
         <li className={classNames.linkContainer}>
@@ -52,7 +60,7 @@ function Header() {
             className={classNames.link}
             activeClassName={classNames.activeLink}
           >
-            Incidents <span>0</span>
+            Incidents <span>{withIncidents}</span>
           </NavLink>
         </li>
       </ul>

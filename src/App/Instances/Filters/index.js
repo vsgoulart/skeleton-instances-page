@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {useLocation, useHistory} from 'react-router-dom';
 
 import classNames from './index.module.scss';
-import {ENDPOINTS} from '../../endpoints';
+import {ENDPOINTS} from '../../../stores/endpoints';
 
 const PARAMS = ['workflow', 'version', 'ids', 'errorMessage', 'startDate', 'endDate', 'active', 'incidents'];
 
