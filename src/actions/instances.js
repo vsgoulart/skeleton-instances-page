@@ -22,10 +22,10 @@ export const getWorkflowInstances = () => async (dispatch, getState) => {
     body: JSON.stringify(filtersInQuerystring),
   });
 
-  var resposneJson = await response.json();
+  var responseJson = await response.json();
   dispatch({
     type: 'GET_WORKFLOW_INSTANCES_FINISHED',
-    payload: resposneJson,
+    payload: responseJson,
   });
 };
 
@@ -62,10 +62,10 @@ export const pollWorkflowInstances = isPollingActive => async (dispatch, getStat
       body: JSON.stringify(filtersInQuerystring),
     });
 
-    var resposneJson = await response.json();
+    var responseJson = await response.json();
     dispatch({
       type: 'GET_WORKFLOW_INSTANCES_FINISHED',
-      payload: resposneJson,
+      payload: responseJson,
     });
   }, 5000);
 };

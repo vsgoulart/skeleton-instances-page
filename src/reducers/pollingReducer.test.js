@@ -1,10 +1,5 @@
-// add custom jest matchers from jest-dom
 import '@testing-library/jest-dom/extend-expect';
-// the component to test
 import pollingReducer from './pollingReducer';
-
-// https://jestjs.io/docs/en/mock-functions#mocking-modules
-jest.mock('axios');
 
 test('TRIGGER_POLLING', async () => {
   let state = {};

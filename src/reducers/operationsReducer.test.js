@@ -1,9 +1,5 @@
-// add custom jest matchers from jest-dom
 import '@testing-library/jest-dom/extend-expect';
-// the component to test
 import operationsReducer from './operationsReducer';
-
-// https://jestjs.io/docs/en/mock-functions#mocking-modules
 jest.mock('axios');
 
 test('CANCEL_OPERATION: state should not be changed', async () => {
@@ -30,11 +26,21 @@ test('GET_OPERATIONS: should return state correctly', async () => {
   var currentState = {operations: [{id: 1}, {id: 2}]};
 
   var state = operationsReducer(currentState, {
-    type: 'GET_OPERATIONS',
-    payload: [{id: 1}, {id: 2}, {id: 3}],
+    type: 'GET_OPERATIONS_FINISHED',
+    payload: [
+      {id: 1, endDate: '2020-12-12'},
+      {id: 2, endDate: '2020-12-12'},
+      {id: 3, endDate: null},
+    ],
   });
 
   expect(state).toEqual({
-    operations: [{id: 1}, {id: 2}, {id: 3}],
+    operations: [
+      {id: 1, endDate: '2020-12-12'},
+      {id: 2, endDate: '2020-12-12'},
+      {id: 3, endDate: null},
+    ],
+    active: [3],
+    isLoading: false,
   });
 });

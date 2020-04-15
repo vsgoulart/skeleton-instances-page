@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/extend-expect';
-import {getBatchOperations, cancelOperation, retryOperation, createBatchOperation} from './index';
+import {getBatchOperations, createOperation, createBatchOperation} from './index';
 
 const mockResponse = (status, response) => {
   return new window.Response(response, {
@@ -24,28 +24,17 @@ test('getBatchOperations', async () => {
     payload: {test: 123},
   });
 });
-test('cancelOperation', async () => {
+test('createOperation', async () => {
   var mockDispatch = jest.fn();
   window.fetch = jest.fn().mockImplementation(() => Promise.resolve(mockResponse(200, '{"test":123}')));
 
-  await cancelOperation({id: 1})(mockDispatch);
+  await createOperation({id: 1})(mockDispatch);
 
   expect(mockDispatch).toHaveBeenNthCalledWith(1, {
-    type: 'CANCEL_OPERATION',
-    payload: {test: 123},
+    type: 'CREATE_OPERATION',
   });
 });
-test('retryOperation', async () => {
-  var mockDispatch = jest.fn();
-  window.fetch = jest.fn().mockImplementation(() => Promise.resolve(mockResponse(200, '{"test":123}')));
 
-  await retryOperation({id: 1})(mockDispatch);
-
-  expect(mockDispatch).toHaveBeenNthCalledWith(1, {
-    type: 'RETRY_OPERATION',
-    payload: {test: 123},
-  });
-});
 test('createBatchOperation', async () => {
   var mockDispatch = jest.fn();
   window.fetch = jest.fn().mockImplementation(() => Promise.resolve(mockResponse(200, '{"test":123}')));

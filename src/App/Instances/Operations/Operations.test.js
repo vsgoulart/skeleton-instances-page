@@ -1,17 +1,7 @@
-// import dependencies
 import React from 'react';
-
-// import react-testing methods
-import {render, fireEvent, waitFor, screen} from '@testing-library/react';
-
-// add custom jest matchers from jest-dom
+import {render, screen} from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
-import axiosMock from 'axios';
-// the component to test
 import {Operations} from './index';
-
-// https://jestjs.io/docs/en/mock-functions#mocking-modules
-jest.mock('axios');
 
 test('has correct title', async () => {
   var mockGetBatchOperations = jest.fn();
@@ -26,7 +16,7 @@ test('has correct title', async () => {
 
 test('lists operations', async () => {
   var mockGetBatchOperations = jest.fn();
-  const {container, asFragment} = render(
+  const {asFragment} = render(
     <Operations
       getBatchOperations={mockGetBatchOperations}
       operations={[

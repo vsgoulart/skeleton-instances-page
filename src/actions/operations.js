@@ -1,4 +1,4 @@
-export const cancelOperation = operation => async dispatch => {
+export const createOperation = operation => async dispatch => {
   const response = await fetch(`/api/workflow-instances/${operation.id}/operation`, {
     method: 'POST',
     headers: {
@@ -7,26 +7,9 @@ export const cancelOperation = operation => async dispatch => {
     body: JSON.stringify({operationType: operation.type}),
   });
 
-  var resposneJson = await response.json();
+  await response.json();
   dispatch({
-    type: 'CANCEL_OPERATION',
-    payload: resposneJson,
-  });
-};
-
-export const retryOperation = operation => async dispatch => {
-  const response = await fetch(`/api/workflow-instances/${operation.id}/operation`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({operationType: operation.type}),
-  });
-
-  var resposneJson = await response.json();
-  dispatch({
-    type: 'RETRY_OPERATION',
-    payload: resposneJson,
+    type: 'CREATE_OPERATION',
   });
 };
 
@@ -51,10 +34,10 @@ export const createBatchOperation = operation => async dispatch => {
     }),
   });
 
-  var resposneJson = await response.json();
+  var responseJson = await response.json();
   dispatch({
     type: 'CREATE_BATCH_OPREATION',
-    payload: resposneJson,
+    payload: responseJson,
   });
 };
 
@@ -71,10 +54,10 @@ export const getBatchOperations = () => async dispatch => {
     body: JSON.stringify({pageSize: 20}),
   });
 
-  var resposneJson = await response.json();
+  var responseJson = await response.json();
   dispatch({
     type: 'GET_OPERATIONS_FINISHED',
-    payload: resposneJson,
+    payload: responseJson,
   });
 };
 

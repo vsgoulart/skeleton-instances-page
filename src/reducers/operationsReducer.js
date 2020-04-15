@@ -1,9 +1,6 @@
 export default (state = {}, action) => {
   switch (action.type) {
-    case 'CANCEL_OPERATION': {
-      return {...state};
-    }
-    case 'RETRY_OPERATION': {
+    case 'CREATE_OPERATION': {
       return {...state};
     }
     case 'CREATE_BATCH_OPREATION': {

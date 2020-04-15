@@ -36,7 +36,7 @@ function Header({getStatistics, statistics, totalInstanceCount}) {
             className={classNames.link}
             activeClassName={classNames.activeLink}
           >
-            Running Instances <span>{statistics ? statistics.running : 0}</span>
+            Running Instances <span>{statistics.running}</span>
           </NavLink>
         </li>
         <li className={classNames.linkContainer}>
@@ -58,7 +58,7 @@ function Header({getStatistics, statistics, totalInstanceCount}) {
             className={classNames.link}
             activeClassName={classNames.activeLink}
           >
-            Incidents <span>{statistics ? statistics.withIncidents : 0}</span>
+            Incidents <span>{statistics.withIncidents}</span>
           </NavLink>
         </li>
       </ul>

@@ -5,8 +5,7 @@ import {Pagination} from './Pagination';
 import {connect} from 'react-redux';
 
 import {
-  cancelOperation,
-  retryOperation,
+  createOperation,
   createBatchOperation,
   getWorkflowInstances,
   pollWorkflowInstances,
@@ -20,8 +19,7 @@ const STATE = Object.freeze({
 });
 
 function Table({
-  cancelOperation,
-  retryOperation,
+  createOperation,
   getWorkflowInstances,
   workflowInstances,
   createBatchOperation,
@@ -51,9 +49,10 @@ function Table({
     if (!isInstancesLoading && activeInstances && activeInstances.length === 0) {
       pollWorkflowInstances(false);
       pollStatistics(false);
-    }
-    if (!isOperationsLoading && activeOperations && activeOperations.length === 0) {
-      pollBatchOperations(false);
+
+      if (!isOperationsLoading && activeOperations && activeOperations.length === 0) {
+        pollBatchOperations(false);
+      }
     }
   }, [
     isInstancesLoading,
@@ -65,9 +64,9 @@ function Table({
     isOperationsLoading,
   ]);
 
-  function onCancel(id) {
+  function onCreateOperation(id, type) {
     setInstancesAsActive([id]);
-    cancelOperation({id: id, type: 'CANCEL_WORKFLOW_INSTANCE'});
+    createOperation({id: id, type: type});
     if (!isInstancePollingActive) {
       pollWorkflowInstances(true);
       pollStatistics(true);
@@ -75,32 +74,14 @@ function Table({
     }
   }
 
-  function onBatchCancel() {
+  function onCreateBatchOperation(id, type) {
     setInstancesAsActive(selectedIds);
-    createBatchOperation({ids: selectedIds, type: 'CANCEL_WORKFLOW_INSTANCE'});
+    createBatchOperation({ids: selectedIds, type: type});
     if (!isInstancePollingActive) {
       pollWorkflowInstances(true);
       pollStatistics(true);
       pollBatchOperations(true);
     }
-  }
-
-  function onBatchRetry() {
-    setInstancesAsActive(selectedIds);
-    createBatchOperation({ids: selectedIds, type: 'RETRY_WORKFLOW_INSTANCE'});
-    if (!isInstancePollingActive) {
-      pollWorkflowInstances(true);
-      pollStatistics(true);
-      pollBatchOperations(true);
-    }
-  }
-
-  function onRetry(id) {
-    setInstancesAsActive([id]);
-    retryOperation({id: id, type: 'RETRY_WORKFLOW_INSTANCE'});
-    pollWorkflowInstances(true);
-    pollStatistics(true);
-    pollBatchOperations(true);
   }
 
   return (
@@ -155,11 +136,11 @@ function Table({
                 <td>
                   {hasActiveOperation && 'Loading...'}
                   {STATE.INCIDENT === state && (
-                    <button onClick={() => onRetry(id)} type="button">
+                    <button onClick={() => onCreateOperation(id, 'RETRY_WORKFLOW_INSTANCE')} type="button">
                       Retry
                     </button>
                   )}
-                  <button onClick={() => onCancel(id)} type="button">
+                  <button onClick={() => onCreateOperation(id, 'CANCEL_WORKFLOW_INSTANCE')} type="button">
                     Cancel
                   </button>
                 </td>
@@ -168,10 +149,18 @@ function Table({
         </tbody>
       </table>
       <div>
-        <button type="button" onClick={() => onBatchRetry()} disabled={!areAllIdsSelected && selectedIds.length === 0}>
+        <button
+          type="button"
+          onClick={() => onCreateBatchOperation('RETRY_WORKFLOW_INSTANCE')}
+          disabled={!areAllIdsSelected && selectedIds.length === 0}
+        >
           Retry
         </button>
-        <button type="button" onClick={() => onBatchCancel()} disabled={!areAllIdsSelected && selectedIds.length === 0}>
+        <button
+          type="button"
+          onClick={() => onCreateBatchOperation('CANCEL_WORKFLOW_INSTANCE')}
+          disabled={!areAllIdsSelected && selectedIds.length === 0}
+        >
           Cancel
         </button>
         <Pagination
@@ -185,7 +174,7 @@ function Table({
   );
 }
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = state => {
   const {instances, operations} = state;
 
   return {
@@ -199,10 +188,9 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 export default connect(mapStateToProps, {
-  cancelOperation,
-  retryOperation,
-  getWorkflowInstances,
+  createOperation,
   createBatchOperation,
+  getWorkflowInstances,
   pollWorkflowInstances,
   pollStatistics,
   pollBatchOperations,
