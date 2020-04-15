@@ -2,7 +2,7 @@ import {createEffect, forward, guard} from 'effector';
 import throttle from 'lodash.throttle';
 import {ENDPOINTS} from '../endpoints';
 import {instances$, totalCount$} from './stores';
-import {pollOperations} from '../operations';
+import {createBatchOperation, createOperation} from '../operations';
 
 const throttledPollInstacesHandler = throttle(
   () =>
@@ -20,7 +20,8 @@ const pollInstances = createEffect({
 instances$.on(pollInstances.doneData, (_, response) => response.workflowInstances);
 totalCount$.on(pollInstances.doneData, (_, response) => response.totalCount);
 
-forward({from: pollOperations.done, to: pollInstances});
+forward({from: createBatchOperation.doneData, to: pollInstances});
+forward({from: createOperation.doneData, to: pollInstances});
 guard({
   source: instances$,
   filter: instances => instances.some(instance => instance.hasActiveOperation),
