@@ -14,6 +14,8 @@ const DEFAULT_STATE = {
 class FilterStore {
   state = {...DEFAULT_STATE};
 
+  // this is acomputed value which derives from the original state.
+  // in the component it can be observed in the same way like observables.
   get searchParams() {
     const params = new URLSearchParams();
     Object.entries(this.state).forEach(([key, value]) => {
@@ -29,6 +31,16 @@ class FilterStore {
   reset = () => {
     this.state = {...DEFAULT_STATE};
   };
+
+  /**
+   * instead of decorating the methods/variables using "decorate" like below,
+   * decorators can be used on the methods/vars directly like this:
+   *
+   * @action
+   * reset = () => {
+   *   this.state = {...DEFAULT_STATE};
+   * };
+   */
 }
 
 decorate(FilterStore, {

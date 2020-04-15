@@ -1,10 +1,16 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect} from 'react';
 
 import classNames from './index.module.scss';
 import {Pagination} from './Pagination';
 import {useStores} from '../../../hooks/useStores';
-import {observer} from 'mobx-react';
-import {createOperation, fetchOperations, fetchWorkflowInstances, fetchStatistics} from '../../api';
+import {observer, useLocalStore} from 'mobx-react';
+import {
+  createOperation,
+  fetchOperations,
+  fetchWorkflowInstances,
+  fetchStatistics,
+  createBatchOperation,
+} from '../../api';
 
 const STATE = Object.freeze({
   ACTIVE: 'ACTIVE',
@@ -12,8 +18,6 @@ const STATE = Object.freeze({
 });
 
 const Table = observer(() => {
-  const [selectedIds, setSelectedIds] = useState([]);
-  const [areAllIdsSelected, setAreAllIdsSelected] = useState(false);
   const {filterStore, instancesStore, operationsStore, statisticsStore} = useStores();
   const {workflowInstances, totalCount} = instancesStore.state;
 
@@ -26,13 +30,36 @@ const Table = observer(() => {
     loadWorkflowInstances();
 
     return () => {
+      // it is important to reset the store to default when unmounting the component
+      // otherwise it would show the old state on the next mount.
       instancesStore.reset();
     };
   }, [filterStore, instancesStore]);
 
-  const handleClick = (instanceId, operationType) => async () => {
+  // For component state we could use useLocalStorage from mobx or useState from react
+  // https://mobx-react.js.org/state-local
+  const selection = useLocalStore(() => ({
+    selectedIds: [],
+    setSelectedIds(ids) {
+      selection.selectedIds = ids;
+    },
+    areAllIdsSelected: false,
+    setAreAllIdsSelected(state) {
+      selection.areAllIdsSelected = state;
+    },
+    // this is a computed value deriving state from observables
+    get ids() {
+      return selection.areAllIdsSelected ? [] : selection.selectedIds;
+    },
+    get query() {
+      return {...filterStore.state, ids: selection.ids, excludedIds: []};
+    },
+  }));
+
+  const handleSingleClick = (instanceId, operationType) => async () => {
     await createOperation(instanceId, operationType);
 
+    // this triggers all 3 requests concurrently
     const [operations, instances, count] = await Promise.all([
       fetchOperations(),
       fetchWorkflowInstances(filterStore.searchParams),
@@ -43,6 +70,12 @@ const Table = observer(() => {
     instancesStore.setInstances(instances);
     statisticsStore.setCount(count);
   };
+
+  const handleBatchClick = operationType => async () => {
+    createBatchOperation({operationType, query: selection.query});
+  };
+
+  const {selectedIds, setSelectedIds, setAreAllIdsSelected, areAllIdsSelected} = selection;
 
   return (
     <>
@@ -69,7 +102,7 @@ const Table = observer(() => {
           </tr>
         </thead>
         <tbody>
-          {workflowInstances.map(({id, workflowName, state, startDate, endDate}) => (
+          {workflowInstances.map(({id, workflowName, state, startDate, endDate, hasActiveOperation}) => (
             <tr key={id}>
               <td>
                 <input
@@ -94,23 +127,32 @@ const Table = observer(() => {
               <td>{endDate}</td>
               <td>
                 {STATE.INCIDENT === state && (
-                  <button type="button" onClick={handleClick(id, 'RESOLVE_INCIDENT')}>
+                  <button type="button" onClick={handleSingleClick(id, 'RESOLVE_INCIDENT')}>
                     Retry
                   </button>
                 )}
-                <button type="button" onClick={handleClick(id, 'CANCEL_WORKFLOW_INSTANCE')}>
+                <button type="button" onClick={handleSingleClick(id, 'CANCEL_WORKFLOW_INSTANCE')}>
                   Cancel
                 </button>
+                {hasActiveOperation && ' L'}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
       <div>
-        <button type="button" disabled={!areAllIdsSelected && selectedIds.length === 0}>
+        <button
+          type="button"
+          disabled={!areAllIdsSelected && selectedIds.length === 0}
+          onClick={handleBatchClick('RESOLVE_INCIDENT')}
+        >
           Retry
         </button>
-        <button type="button" disabled={!areAllIdsSelected && selectedIds.length === 0}>
+        <button
+          type="button"
+          disabled={!areAllIdsSelected && selectedIds.length === 0}
+          onClick={handleBatchClick('CANCEL_WORKFLOW_INSTANCE')}
+        >
           Cancel
         </button>
         <Pagination
