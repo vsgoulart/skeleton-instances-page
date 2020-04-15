@@ -17,7 +17,10 @@ test('getBatchOperations', async () => {
   await getBatchOperations()(mockDispatch);
 
   expect(mockDispatch).toHaveBeenNthCalledWith(1, {
-    type: 'GET_OPERATIONS',
+    type: 'GET_OPERATIONS_LOADING',
+  });
+  expect(mockDispatch).toHaveBeenNthCalledWith(2, {
+    type: 'GET_OPERATIONS_FINISHED',
     payload: {test: 123},
   });
 });

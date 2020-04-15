@@ -1,3 +1,10 @@
+export const setInstancesAsActive = ids => async (dispatch, getState) => {
+  dispatch({
+    type: 'SET_INSTANCES_AS_ACTIVE',
+    payload: {workflowInstances: getState().instances.instances, activeInstanceIds: ids},
+  });
+};
+
 export const getWorkflowInstances = () => async (dispatch, getState) => {
   dispatch({
     type: 'GET_WORKFLOW_INSTANCES_LOADING',

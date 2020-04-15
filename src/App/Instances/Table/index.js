@@ -12,6 +12,7 @@ import {
   pollWorkflowInstances,
   pollStatistics,
   pollBatchOperations,
+  setInstancesAsActive,
 } from '../../../actions';
 const STATE = Object.freeze({
   ACTIVE: 'ACTIVE',
@@ -33,6 +34,7 @@ function Table({
   activeInstances,
   activeOperations,
   isInstancePollingActive,
+  setInstancesAsActive,
 }) {
   const [selectedIds, setSelectedIds] = useState([]);
   const [areAllIdsSelected, setAreAllIdsSelected] = useState(false);
@@ -64,6 +66,7 @@ function Table({
   ]);
 
   function onCancel(id) {
+    setInstancesAsActive([id]);
     cancelOperation({id: id, type: 'CANCEL_WORKFLOW_INSTANCE'});
     if (!isInstancePollingActive) {
       pollWorkflowInstances(true);
@@ -73,6 +76,7 @@ function Table({
   }
 
   function onBatchCancel() {
+    setInstancesAsActive(selectedIds);
     createBatchOperation({ids: selectedIds, type: 'CANCEL_WORKFLOW_INSTANCE'});
     if (!isInstancePollingActive) {
       pollWorkflowInstances(true);
@@ -81,7 +85,18 @@ function Table({
     }
   }
 
+  function onBatchRetry() {
+    setInstancesAsActive(selectedIds);
+    createBatchOperation({ids: selectedIds, type: 'RETRY_WORKFLOW_INSTANCE'});
+    if (!isInstancePollingActive) {
+      pollWorkflowInstances(true);
+      pollStatistics(true);
+      pollBatchOperations(true);
+    }
+  }
+
   function onRetry(id) {
+    setInstancesAsActive([id]);
     retryOperation({id: id, type: 'RETRY_WORKFLOW_INSTANCE'});
     pollWorkflowInstances(true);
     pollStatistics(true);
@@ -153,7 +168,7 @@ function Table({
         </tbody>
       </table>
       <div>
-        <button type="button" disabled={!areAllIdsSelected && selectedIds.length === 0}>
+        <button type="button" onClick={() => onBatchRetry()} disabled={!areAllIdsSelected && selectedIds.length === 0}>
           Retry
         </button>
         <button type="button" onClick={() => onBatchCancel()} disabled={!areAllIdsSelected && selectedIds.length === 0}>
@@ -191,4 +206,5 @@ export default connect(mapStateToProps, {
   pollWorkflowInstances,
   pollStatistics,
   pollBatchOperations,
+  setInstancesAsActive,
 })(Table);

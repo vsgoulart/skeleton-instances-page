@@ -35,6 +35,7 @@ test('GET_WORKFLOW_INSTANCES_FINISHED: should return state correctly', async () 
     active: [1, 4],
     instances: workflowInstances,
     totalCount: 5,
+    isLoading: false,
   });
 });
 
@@ -67,5 +68,6 @@ test('GET_WORKFLOW_INSTANCES_FINISHED: should update state correctly', async () 
     active: [],
     instances: updatedWorkflowInstances,
     totalCount: 4,
+    isLoading: false,
   });
 });

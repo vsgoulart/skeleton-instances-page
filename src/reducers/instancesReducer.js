@@ -33,6 +33,28 @@ export default (state = {}, action) => {
         isLoading: false,
       };
     }
+    case 'SET_INSTANCES_AS_ACTIVE': {
+      const activeInstanceIds = action.payload.activeInstanceIds;
+      let instances = action.payload.workflowInstances;
+
+      instances.forEach(instance => {
+        if (activeInstanceIds.includes(instance.id)) {
+          instance.hasActiveOperation = true;
+        }
+      });
+
+      var active = instances
+        .filter(instance => instance.hasActiveOperation)
+        .map(x => {
+          return x.id;
+        });
+
+      return {
+        ...state,
+        active: active,
+        instances: instances,
+      };
+    }
 
     default:
       return state;

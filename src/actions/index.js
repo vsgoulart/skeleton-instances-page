@@ -2,7 +2,7 @@
 //history.push('/')
 
 export {getStatistics, pollStatistics} from './statistics';
-export {getWorkflowInstances, pollWorkflowInstances} from './instances';
+export {getWorkflowInstances, pollWorkflowInstances, setInstancesAsActive} from './instances';
 export {
   cancelOperation,
   retryOperation,
