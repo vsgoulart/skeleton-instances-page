@@ -3,15 +3,15 @@ import React, {useState, useEffect} from 'react';
 import classNames from './index.module.scss';
 import {Pagination} from './Pagination';
 import {connect} from 'react-redux';
-import {withPolling} from '../../Polling/withPolling';
-import {POLLING_TYPES} from '../../Polling/constants';
 
 import {
   cancelOperation,
   retryOperation,
   createBatchOperation,
   getWorkflowInstances,
-  triggerPolling,
+  pollWorkflowInstances,
+  pollStatistics,
+  pollBatchOperations,
 } from '../../../actions';
 const STATE = Object.freeze({
   ACTIVE: 'ACTIVE',
@@ -25,43 +25,67 @@ function Table({
   workflowInstances,
   createBatchOperation,
   totalInstanceCount,
-  triggerPolling,
+  pollWorkflowInstances,
+  pollStatistics,
+  pollBatchOperations,
+  isInstancesLoading,
+  isOperationsLoading,
   activeInstances,
-  isLoading,
+  activeOperations,
+  isInstancePollingActive,
 }) {
   const [selectedIds, setSelectedIds] = useState([]);
   const [areAllIdsSelected, setAreAllIdsSelected] = useState(false);
 
   useEffect(() => {
-    triggerPolling(POLLING_TYPES.workflowInstances, true);
-  }, [triggerPolling]);
+    getWorkflowInstances();
+
+    // if any active operations exists, polling should be done
+    pollWorkflowInstances(true);
+    pollBatchOperations(true);
+  }, [getWorkflowInstances, pollWorkflowInstances, pollBatchOperations]);
 
   useEffect(() => {
-    if (!isLoading && activeInstances && activeInstances.length === 0) {
-      triggerPolling(POLLING_TYPES.workflowInstances, false);
-      triggerPolling(POLLING_TYPES.batchOperations, false);
-      triggerPolling(POLLING_TYPES.statistics, false);
+    if (!isInstancesLoading && activeInstances && activeInstances.length === 0) {
+      pollWorkflowInstances(false);
+      pollStatistics(false);
     }
-  }, [isLoading, activeInstances, triggerPolling]);
+    if (!isOperationsLoading && activeOperations && activeOperations.length === 0) {
+      pollBatchOperations(false);
+    }
+  }, [
+    isInstancesLoading,
+    activeInstances,
+    pollWorkflowInstances,
+    pollStatistics,
+    pollBatchOperations,
+    activeOperations,
+    isOperationsLoading,
+  ]);
 
   function onCancel(id) {
     cancelOperation({id: id, type: 'CANCEL_WORKFLOW_INSTANCE'});
-    triggerPolling(POLLING_TYPES.workflowInstances, true);
-    triggerPolling(POLLING_TYPES.batchOperations, true);
-    triggerPolling(POLLING_TYPES.statistics, true);
+    if (!isInstancePollingActive) {
+      pollWorkflowInstances(true);
+      pollStatistics(true);
+      pollBatchOperations(true);
+    }
   }
 
   function onBatchCancel() {
     createBatchOperation({ids: selectedIds, type: 'CANCEL_WORKFLOW_INSTANCE'});
-    triggerPolling(POLLING_TYPES.workflowInstances, true);
-    triggerPolling(POLLING_TYPES.batchOperations, true);
-    triggerPolling(POLLING_TYPES.statistics, true);
+    if (!isInstancePollingActive) {
+      pollWorkflowInstances(true);
+      pollStatistics(true);
+      pollBatchOperations(true);
+    }
   }
+
   function onRetry(id) {
     retryOperation({id: id, type: 'RETRY_WORKFLOW_INSTANCE'});
-    triggerPolling(POLLING_TYPES.workflowInstances, true);
-    triggerPolling(POLLING_TYPES.batchOperations, true);
-    triggerPolling(POLLING_TYPES.statistics, true);
+    pollWorkflowInstances(true);
+    pollStatistics(true);
+    pollBatchOperations(true);
   }
 
   return (
@@ -147,20 +171,24 @@ function Table({
 }
 
 const mapStateToProps = (state, ownProps) => {
+  const {instances, operations} = state;
+
   return {
-    operations: state.operations,
-    workflowInstances: state.instances.instances,
-    activeInstances: state.instances.active,
-    totalInstanceCount: state.instances.totalCount,
-    isLoading: state.instances.isLoading,
+    workflowInstances: instances.instances,
+    activeInstances: instances.active,
+    totalInstanceCount: instances.totalCount,
+    isInstancesLoading: instances.isLoading,
+    isInstancePollingActive: instances.isPolling,
+    isOperationsLoading: operations.isLoading,
+    activeOperations: operations.active,
   };
 };
-export default withPolling([POLLING_TYPES.workflowInstances, POLLING_TYPES.batchOperations, POLLING_TYPES.statistics])(
-  connect(mapStateToProps, {
-    cancelOperation,
-    retryOperation,
-    getWorkflowInstances,
-    createBatchOperation,
-    triggerPolling,
-  })(Table),
-);
+export default connect(mapStateToProps, {
+  cancelOperation,
+  retryOperation,
+  getWorkflowInstances,
+  createBatchOperation,
+  pollWorkflowInstances,
+  pollStatistics,
+  pollBatchOperations,
+})(Table);

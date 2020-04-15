@@ -6,6 +6,18 @@ export default (state = {}, action) => {
         isLoading: true,
       };
     }
+    case 'POLL_WORKFLOW_INSTANCES_BEGIN': {
+      return {
+        ...state,
+        isPolling: true,
+      };
+    }
+    case 'POLL_WORKFLOW_INSTANCES_END': {
+      return {
+        ...state,
+        isPolling: false,
+      };
+    }
     case 'GET_WORKFLOW_INSTANCES_FINISHED': {
       var activeInstances = action.payload.workflowInstances
         .filter(instance => instance.hasActiveOperation)

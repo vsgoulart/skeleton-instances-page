@@ -41,7 +41,7 @@ function Header({getStatistics, statistics, totalInstanceCount}) {
         </li>
         <li className={classNames.linkContainer}>
           <NavLink to="/instances" exact className={classNames.link} activeClassName={classNames.activeLink}>
-            Filters <span>{totalInstanceCount}</span>
+            Filters <span>{totalInstanceCount ? totalInstanceCount : statistics.running}</span>
           </NavLink>
         </li>
         <li className={classNames.linkContainer}>
@@ -67,7 +67,7 @@ function Header({getStatistics, statistics, totalInstanceCount}) {
 }
 const mapStateToProps = (state, ownProps) => {
   return {
-    statistics: state.statistics,
+    statistics: state.statistics.statistics,
     totalInstanceCount: state.instances.totalCount,
   };
 };

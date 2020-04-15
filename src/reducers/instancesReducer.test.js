@@ -12,12 +12,6 @@ import instancesReducer from './instancesReducer';
 // https://jestjs.io/docs/en/mock-functions#mocking-modules
 jest.mock('axios');
 
-test('GET_WORKFLOW_INSTANCES_LOADING', async () => {
-  var state = instancesReducer({}, {type: 'GET_WORKFLOW_INSTANCES_LOADING'});
-
-  expect(state).toEqual({isLoading: true});
-});
-
 test('GET_WORKFLOW_INSTANCES_FINISHED: should return state correctly', async () => {
   var workflowInstances = [
     {hasActiveOperation: true, id: 1},
@@ -41,7 +35,6 @@ test('GET_WORKFLOW_INSTANCES_FINISHED: should return state correctly', async () 
     active: [1, 4],
     instances: workflowInstances,
     totalCount: 5,
-    isLoading: false,
   });
 });
 
@@ -60,7 +53,7 @@ test('GET_WORKFLOW_INSTANCES_FINISHED: should update state correctly', async () 
     {hasActiveOperation: false, id: 4},
   ];
   var state = instancesReducer(
-    {isLoading: true, instances: currentWorkflowInstances, totalCount: 5},
+    {instances: currentWorkflowInstances, totalCount: 5},
     {
       type: 'GET_WORKFLOW_INSTANCES_FINISHED',
       payload: {
@@ -74,6 +67,5 @@ test('GET_WORKFLOW_INSTANCES_FINISHED: should update state correctly', async () 
     active: [],
     instances: updatedWorkflowInstances,
     totalCount: 4,
-    isLoading: false,
   });
 });

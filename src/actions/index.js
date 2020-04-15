@@ -1,7 +1,13 @@
 // import history from '../history';
 //history.push('/')
 
-export {getStatistics} from './statistics';
+export {getStatistics, pollStatistics} from './statistics';
+export {getWorkflowInstances, pollWorkflowInstances} from './instances';
+export {
+  cancelOperation,
+  retryOperation,
+  createBatchOperation,
+  getBatchOperations,
+  pollBatchOperations,
+} from './operations';
 export {triggerPolling} from './polling';
-export {getWorkflowInstances} from './instances';
-export {cancelOperation, retryOperation, createBatchOperation, getBatchOperations} from './operations';

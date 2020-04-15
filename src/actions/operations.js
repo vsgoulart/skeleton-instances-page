@@ -59,6 +59,10 @@ export const createBatchOperation = operation => async dispatch => {
 };
 
 export const getBatchOperations = () => async dispatch => {
+  dispatch({
+    type: 'GET_OPERATIONS_LOADING',
+  });
+
   const response = await fetch('/api/batch-operations', {
     method: 'POST',
     headers: {
@@ -69,7 +73,43 @@ export const getBatchOperations = () => async dispatch => {
 
   var resposneJson = await response.json();
   dispatch({
-    type: 'GET_OPERATIONS',
+    type: 'GET_OPERATIONS_FINISHED',
     payload: resposneJson,
   });
+};
+
+export const pollBatchOperations = isPollingActive => async (dispatch, getState) => {
+  if (!isPollingActive) {
+    dispatch({
+      type: 'POLL_BATCH_OPERATIONS_END',
+    });
+
+    return;
+  }
+
+  dispatch({
+    type: 'POLL_BATCH_OPERATIONS_BEGIN',
+  });
+
+  var timerId = setInterval(async function () {
+    if (!getState().operations.isPolling) {
+      clearInterval(timerId);
+      return;
+    }
+    dispatch({
+      type: 'GET_OPERATIONS_LOADING',
+    });
+    const response = await fetch('/api/batch-operations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({pageSize: 20}),
+    });
+    var responseJson = await response.json();
+    dispatch({
+      type: 'GET_OPERATIONS_FINISHED',
+      payload: responseJson,
+    });
+  }, 5000);
 };
