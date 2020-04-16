@@ -1,20 +1,27 @@
-export const createOperation = operation => async dispatch => {
-  const response = await fetch(`/api/workflow-instances/${operation.id}/operation`, {
+import throttle from 'lodash.throttle';
+
+import {pollInstances} from './instances';
+
+const createOperation = operation => async dispatch => {
+  const payload = await fetch(`/api/workflow-instances/${operation.id}/operation`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({operationType: operation.type}),
-  });
+  }).then(response => response.json());
 
-  await response.json();
+  dispatch(pollOperations);
+  dispatch(pollInstances);
+
   dispatch({
     type: 'CREATE_OPERATION',
+    payload,
   });
 };
 
-export const createBatchOperation = operation => async dispatch => {
-  const response = await fetch('/api/workflow-instances/batch-operation', {
+const createBatchOperation = operation => async dispatch => {
+  const payload = await fetch('/api/workflow-instances/batch-operation', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -32,67 +39,44 @@ export const createBatchOperation = operation => async dispatch => {
         excludeIds: [],
       },
     }),
-  });
+  }).then(response => response.json());
 
-  var responseJson = await response.json();
+  dispatch(pollOperations);
+  dispatch(pollInstances);
+
   dispatch({
     type: 'CREATE_BATCH_OPREATION',
-    payload: responseJson,
+    payload,
   });
 };
 
-export const getBatchOperations = () => async dispatch => {
+const getOperations = () => async dispatch => {
   dispatch({
     type: 'GET_OPERATIONS_LOADING',
   });
 
-  const response = await fetch('/api/batch-operations', {
+  const payload = await fetch('/api/batch-operations', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({pageSize: 20}),
-  });
+  }).then(response => response.json());
 
-  var responseJson = await response.json();
-  dispatch({
-    type: 'GET_OPERATIONS_FINISHED',
-    payload: responseJson,
-  });
-};
-
-export const pollBatchOperations = isPollingActive => async (dispatch, getState) => {
-  if (!isPollingActive) {
-    dispatch({
-      type: 'POLL_BATCH_OPERATIONS_END',
-    });
-
-    return;
+  if (payload.some(operation => operation.endDate === null)) {
+    dispatch(pollOperations);
   }
 
   dispatch({
-    type: 'POLL_BATCH_OPERATIONS_BEGIN',
+    type: 'GET_OPERATIONS_FINISHED',
+    payload,
   });
-
-  var timerId = setInterval(async function () {
-    if (!getState().operations.isPolling) {
-      clearInterval(timerId);
-      return;
-    }
-    dispatch({
-      type: 'GET_OPERATIONS_LOADING',
-    });
-    const response = await fetch('/api/batch-operations', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({pageSize: 20}),
-    });
-    var responseJson = await response.json();
-    dispatch({
-      type: 'GET_OPERATIONS_FINISHED',
-      payload: responseJson,
-    });
-  }, 5000);
 };
+
+const pollOperations = throttle(dispatch => {
+  setTimeout(() => {
+    dispatch(getOperations());
+  }, 5000);
+}, 5000);
+
+export {createOperation, createBatchOperation, getOperations};

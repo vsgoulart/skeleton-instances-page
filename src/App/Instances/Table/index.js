@@ -4,15 +4,7 @@ import classNames from './index.module.scss';
 import {Pagination} from './Pagination';
 import {connect} from 'react-redux';
 
-import {
-  createOperation,
-  createBatchOperation,
-  getWorkflowInstances,
-  pollWorkflowInstances,
-  pollStatistics,
-  pollBatchOperations,
-  setInstancesAsActive,
-} from '../../../actions';
+import {createOperation, createBatchOperation, getWorkflowInstances, setInstancesAsActive} from '../../../actions';
 const STATE = Object.freeze({
   ACTIVE: 'ACTIVE',
   INCIDENT: 'INCIDENT',
@@ -24,14 +16,6 @@ function Table({
   workflowInstances,
   createBatchOperation,
   totalInstanceCount,
-  pollWorkflowInstances,
-  pollStatistics,
-  pollBatchOperations,
-  isInstancesLoading,
-  isOperationsLoading,
-  activeInstances,
-  activeOperations,
-  isInstancePollingActive,
   setInstancesAsActive,
 }) {
   const [selectedIds, setSelectedIds] = useState([]);
@@ -39,49 +23,16 @@ function Table({
 
   useEffect(() => {
     getWorkflowInstances();
-
-    // if any active operations exists, polling should be done
-    pollWorkflowInstances(true);
-    pollBatchOperations(true);
-  }, [getWorkflowInstances, pollWorkflowInstances, pollBatchOperations]);
-
-  useEffect(() => {
-    if (!isInstancesLoading && activeInstances && activeInstances.length === 0) {
-      pollWorkflowInstances(false);
-      pollStatistics(false);
-
-      if (!isOperationsLoading && activeOperations && activeOperations.length === 0) {
-        pollBatchOperations(false);
-      }
-    }
-  }, [
-    isInstancesLoading,
-    activeInstances,
-    pollWorkflowInstances,
-    pollStatistics,
-    pollBatchOperations,
-    activeOperations,
-    isOperationsLoading,
-  ]);
+  }, [getWorkflowInstances]);
 
   function onCreateOperation(id, type) {
     setInstancesAsActive([id]);
     createOperation({id: id, type: type});
-    if (!isInstancePollingActive) {
-      pollWorkflowInstances(true);
-      pollStatistics(true);
-      pollBatchOperations(true);
-    }
   }
 
   function onCreateBatchOperation(id, type) {
     setInstancesAsActive(selectedIds);
     createBatchOperation({ids: selectedIds, type: type});
-    if (!isInstancePollingActive) {
-      pollWorkflowInstances(true);
-      pollStatistics(true);
-      pollBatchOperations(true);
-    }
   }
 
   return (
@@ -134,6 +85,7 @@ function Table({
                 <td>{startDate}</td>
                 <td>{endDate}</td>
                 <td>
+                  {console.log(hasActiveOperation)}
                   {hasActiveOperation && 'Loading...'}
                   {STATE.INCIDENT === state && (
                     <button onClick={() => onCreateOperation(id, 'RETRY_WORKFLOW_INSTANCE')} type="button">
@@ -175,24 +127,16 @@ function Table({
 }
 
 const mapStateToProps = state => {
-  const {instances, operations} = state;
+  const {instances} = state;
 
   return {
     workflowInstances: instances.instances,
-    activeInstances: instances.active,
     totalInstanceCount: instances.totalCount,
-    isInstancesLoading: instances.isLoading,
-    isInstancePollingActive: instances.isPolling,
-    isOperationsLoading: operations.isLoading,
-    activeOperations: operations.active,
   };
 };
 export default connect(mapStateToProps, {
   createOperation,
   createBatchOperation,
   getWorkflowInstances,
-  pollWorkflowInstances,
-  pollStatistics,
-  pollBatchOperations,
   setInstancesAsActive,
 })(Table);

@@ -1,11 +1,15 @@
-export const setInstancesAsActive = ids => async (dispatch, getState) => {
+import throttle from 'lodash.throttle';
+
+import {getStatistics} from './statistics';
+
+const setInstancesAsActive = ids => async (dispatch, getState) => {
   dispatch({
     type: 'SET_INSTANCES_AS_ACTIVE',
     payload: {workflowInstances: getState().instances.instances, activeInstanceIds: ids},
   });
 };
 
-export const getWorkflowInstances = () => async (dispatch, getState) => {
+const getWorkflowInstances = () => async dispatch => {
   dispatch({
     type: 'GET_WORKFLOW_INSTANCES_LOADING',
   });
@@ -17,55 +21,27 @@ export const getWorkflowInstances = () => async (dispatch, getState) => {
     filtersInQuerystring[value[0]] = value[1];
   }
 
-  const response = await fetch('/api/workflow-instances', {
+  const payload = await fetch('/api/workflow-instances', {
     method: 'POST',
     body: JSON.stringify(filtersInQuerystring),
-  });
+  }).then(response => response.json());
 
-  var responseJson = await response.json();
+  if (payload.workflowInstances.some(({hasActiveOperation}) => hasActiveOperation)) {
+    dispatch(pollInstances);
+  }
+
+  dispatch(getStatistics());
+
   dispatch({
     type: 'GET_WORKFLOW_INSTANCES_FINISHED',
-    payload: responseJson,
+    payload,
   });
 };
 
-export const pollWorkflowInstances = isPollingActive => async (dispatch, getState) => {
-  if (!isPollingActive) {
-    dispatch({
-      type: 'POLL_WORKFLOW_INSTANCES_END',
-    });
-
-    return;
-  }
-
-  dispatch({
-    type: 'POLL_WORKFLOW_INSTANCES_BEGIN',
-  });
-
-  const searchParams = new URLSearchParams(window.location.search);
-
-  var filtersInQuerystring = {};
-  for (var value of searchParams.entries()) {
-    filtersInQuerystring[value[0]] = value[1];
-  }
-
-  var timerId = setInterval(async function () {
-    if (!getState().instances.isPolling) {
-      clearInterval(timerId);
-      return;
-    }
-    dispatch({
-      type: 'GET_WORKFLOW_INSTANCES_LOADING',
-    });
-    const response = await fetch('/api/workflow-instances', {
-      method: 'POST',
-      body: JSON.stringify(filtersInQuerystring),
-    });
-
-    var responseJson = await response.json();
-    dispatch({
-      type: 'GET_WORKFLOW_INSTANCES_FINISHED',
-      payload: responseJson,
-    });
+const pollInstances = throttle(dispatch => {
+  setTimeout(() => {
+    dispatch(getWorkflowInstances());
   }, 5000);
-};
+}, 5000);
+
+export {setInstancesAsActive, getWorkflowInstances, pollInstances};
