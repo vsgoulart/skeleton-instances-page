@@ -3,7 +3,7 @@ import {useHistory} from 'react-router-dom';
 import {observer} from 'mobx-react';
 
 import classNames from './index.module.scss';
-import {fetchWorkflows, fetchWorkflowInstances} from '../../api';
+import {fetchWorkflows} from '../../api';
 import {useStores} from '../../../hooks/useStores';
 
 const Filters = observer(() => {
@@ -26,8 +26,7 @@ const Filters = observer(() => {
   useEffect(() => {
     const update = async () => {
       history.push({search: filterStore.searchParams});
-      const instances = await fetchWorkflowInstances(filterStore.searchParams);
-      instancesStore.setInstances(instances);
+      instancesStore.getInstances();
     };
     update();
   }, [instancesStore, filterStore.searchParams, history]);

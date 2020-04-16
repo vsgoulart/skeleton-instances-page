@@ -4,19 +4,19 @@ import cns from 'classnames';
 import {Observer, useLocalStore, observer} from 'mobx-react';
 import {useStores} from '../../hooks/useStores';
 import classNames from './index.module.scss';
-import {fetchStatistics} from '../api';
 
 const Header = observer(() => {
   const {instancesStore, filterStore, statisticsStore} = useStores();
 
   useEffect(() => {
-    const loadStatistics = async () => {
-      const statistics = await fetchStatistics();
-      statisticsStore.setCount(statistics);
+    statisticsStore.init();
+
+    return () => {
+      statisticsStore.reset();
     };
-    loadStatistics();
   }, [statisticsStore]);
 
+  // could also be moved to filterStore?
   const filter = useLocalStore(() => ({
     get isInstancesActive() {
       const {active, incidents} = filterStore.state;

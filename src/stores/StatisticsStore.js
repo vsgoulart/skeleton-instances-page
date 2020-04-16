@@ -1,4 +1,5 @@
 import {observable, decorate, action} from 'mobx';
+import {fetchStatistics} from '../App/api';
 
 const DEFAULT_STATE = {
   instances: 0,
@@ -9,6 +10,19 @@ const DEFAULT_STATE = {
 class StatisticsStore {
   state = {...DEFAULT_STATE};
 
+  init = async () => {
+    await this.getStatistics();
+  };
+
+  reset = () => {
+    this.state = {...DEFAULT_STATE};
+  };
+
+  getStatistics = async () => {
+    const statistics = await fetchStatistics();
+    this.setCount(statistics);
+  };
+
   setCount = ({running, withIncidents}) => {
     this.state = {instances: running, incidents: withIncidents};
   };
@@ -16,6 +30,7 @@ class StatisticsStore {
 
 decorate(StatisticsStore, {
   state: observable,
+  reset: action,
   setCount: action,
 });
 

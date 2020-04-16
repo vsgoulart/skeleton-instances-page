@@ -14,7 +14,7 @@ const DEFAULT_STATE = {
 class FilterStore {
   state = {...DEFAULT_STATE};
 
-  // this is acomputed value which derives from the original state.
+  // this is a computed value which derives from the original state.
   // in the component it can be observed in the same way like observables.
   get searchParams() {
     const params = new URLSearchParams();

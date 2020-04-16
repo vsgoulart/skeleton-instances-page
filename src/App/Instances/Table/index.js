@@ -4,13 +4,6 @@ import classNames from './index.module.scss';
 import {Pagination} from './Pagination';
 import {useStores} from '../../../hooks/useStores';
 import {observer, useLocalStore} from 'mobx-react';
-import {
-  createOperation,
-  fetchOperations,
-  fetchWorkflowInstances,
-  fetchStatistics,
-  createBatchOperation,
-} from '../../api';
 
 const STATE = Object.freeze({
   ACTIVE: 'ACTIVE',
@@ -18,26 +11,19 @@ const STATE = Object.freeze({
 });
 
 const Table = observer(() => {
-  const {filterStore, instancesStore, operationsStore, statisticsStore} = useStores();
+  const {instancesStore, operationsStore} = useStores();
   const {workflowInstances, totalCount} = instancesStore.state;
 
   useEffect(() => {
-    const loadWorkflowInstances = async () => {
-      const instances = await fetchWorkflowInstances(filterStore.searchParams);
-      instancesStore.setInstances(instances);
-    };
-
-    loadWorkflowInstances();
+    instancesStore.init();
 
     return () => {
       // it is important to reset the store to default when unmounting the component
       // otherwise it would show the old state on the next mount.
       instancesStore.reset();
     };
-  }, [filterStore, instancesStore]);
+  }, [instancesStore]);
 
-  // For component state we could use useLocalStorage from mobx or useState from react
-  // https://mobx-react.js.org/state-local
   const selection = useLocalStore(() => ({
     selectedIds: [],
     setSelectedIds(ids) {
@@ -51,30 +37,15 @@ const Table = observer(() => {
     get ids() {
       return selection.areAllIdsSelected ? [] : selection.selectedIds;
     },
-    get query() {
-      return {...filterStore.state, ids: selection.ids, excludedIds: []};
-    },
   }));
 
   const handleSingleClick = (instanceId, operationType) => async () => {
-    await createOperation(instanceId, operationType);
-
-    // this triggers all 3 requests concurrently
-    const [operations, instances, count] = await Promise.all([
-      fetchOperations(),
-      fetchWorkflowInstances(filterStore.searchParams),
-      fetchStatistics(),
-    ]);
-
-    operationsStore.setOperations(operations);
-    instancesStore.setInstances(instances);
-    statisticsStore.setCount(count);
+    await operationsStore.createOperation(instanceId, operationType);
   };
 
   const handleBatchClick = operationType => async () => {
-    createBatchOperation({operationType, query: selection.query});
+    await operationsStore.createBatchOperation(operationType);
   };
-
   const {selectedIds, setSelectedIds, setAreAllIdsSelected, areAllIdsSelected} = selection;
 
   return (
