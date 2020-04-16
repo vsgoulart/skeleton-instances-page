@@ -5,7 +5,7 @@ import {Operations} from './index';
 
 test('has correct title', async () => {
   var mockGetBatchOperations = jest.fn();
-  const {container, asFragment} = render(<Operations getBatchOperations={mockGetBatchOperations} />);
+  const {container, asFragment} = render(<Operations operations={[]} getOperations={mockGetBatchOperations} />);
   expect(mockGetBatchOperations).toHaveBeenCalledTimes(1);
   const h2 = container.querySelector('h2');
   expect(h2).not.toBe(null);
@@ -18,7 +18,7 @@ test('lists operations', async () => {
   var mockGetBatchOperations = jest.fn();
   const {asFragment} = render(
     <Operations
-      getBatchOperations={mockGetBatchOperations}
+      getOperations={mockGetBatchOperations}
       operations={[
         {id: 1, startDate: '2020-01-01', endDate: '2020-01-02', operationsFinishedCount: 10, operationsTotalCount: 10},
         {id: 2, startDate: '2020-02-01', endDate: '2020-02-02', operationsFinishedCount: 20, operationsTotalCount: 20},

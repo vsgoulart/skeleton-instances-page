@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/extend-expect';
 import instancesReducer from './instancesReducer';
 
-test('GET_WORKFLOW_INSTANCES_FINISHED: should return state correctly', async () => {
+test('GET_WORKFLOW_INSTANCES: should return state correctly', async () => {
   var workflowInstances = [
     {hasActiveOperation: true, id: 1},
     {hasActiveOperation: false, id: 2},
@@ -12,7 +12,7 @@ test('GET_WORKFLOW_INSTANCES_FINISHED: should return state correctly', async () 
   var state = instancesReducer(
     {},
     {
-      type: 'GET_WORKFLOW_INSTANCES_FINISHED',
+      type: 'GET_WORKFLOW_INSTANCES',
       payload: {
         totalCount: workflowInstances.length,
         workflowInstances: workflowInstances,
@@ -21,14 +21,12 @@ test('GET_WORKFLOW_INSTANCES_FINISHED: should return state correctly', async () 
   );
 
   expect(state).toEqual({
-    active: [1, 4],
     instances: workflowInstances,
     totalCount: 5,
-    isLoading: false,
   });
 });
 
-test('GET_WORKFLOW_INSTANCES_FINISHED: should update state correctly', async () => {
+test('GET_WORKFLOW_INSTANCES: should update state correctly', async () => {
   var currentWorkflowInstances = [
     {hasActiveOperation: true, id: 1},
     {hasActiveOperation: false, id: 2},
@@ -45,7 +43,7 @@ test('GET_WORKFLOW_INSTANCES_FINISHED: should update state correctly', async () 
   var state = instancesReducer(
     {instances: currentWorkflowInstances, totalCount: 5},
     {
-      type: 'GET_WORKFLOW_INSTANCES_FINISHED',
+      type: 'GET_WORKFLOW_INSTANCES',
       payload: {
         totalCount: updatedWorkflowInstances.length,
         workflowInstances: updatedWorkflowInstances,
@@ -54,9 +52,7 @@ test('GET_WORKFLOW_INSTANCES_FINISHED: should update state correctly', async () 
   );
 
   expect(state).toEqual({
-    active: [],
     instances: updatedWorkflowInstances,
     totalCount: 4,
-    isLoading: false,
   });
 });

@@ -1,25 +1,19 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {useLocation, useHistory} from 'react-router-dom';
 import {connect} from 'react-redux';
 
 import classNames from './index.module.scss';
-import {ENDPOINTS} from '../../endpoints';
 
-import {getWorkflowInstances} from '../../../actions';
+import {getWorkflowInstances, getGroupedWorkflows} from '../../../actions';
 const PARAMS = ['workflow', 'version', 'ids', 'errorMessage', 'startDate', 'endDate', 'active', 'incidents'];
 
-function Filters({totalInstanceCount, getWorkflowInstances}) {
+function Filters({totalInstanceCount, getWorkflowInstances, getGroupedWorkflows, workflows}) {
   const {workflow, version, ids, errorMessage, startDate, endDate, active, incidents} = useSearchParams(PARAMS);
   const history = useHistory();
-  const [workflows, setWorkflows] = useState([]);
 
   useEffect(() => {
-    async function fetchWorkflows() {
-      setWorkflows(await fetch(ENDPOINTS.workflows).then(response => response.json()));
-    }
-
-    fetchWorkflows();
-  }, []);
+    getGroupedWorkflows();
+  }, [getGroupedWorkflows]);
 
   function updateParam(name, value) {
     const searchParams = new URLSearchParams(window.location.search);
@@ -185,6 +179,7 @@ export {Filters};
 const mapStateToProps = (state, ownProps) => {
   return {
     totalInstanceCount: state.instances.totalCount,
+    workflows: state.workflows,
   };
 };
-export default connect(mapStateToProps, {getWorkflowInstances})(Filters);
+export default connect(mapStateToProps, {getWorkflowInstances, getGroupedWorkflows})(Filters);

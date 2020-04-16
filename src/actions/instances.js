@@ -10,10 +10,6 @@ const setInstancesAsActive = ids => async (dispatch, getState) => {
 };
 
 const getWorkflowInstances = () => async dispatch => {
-  dispatch({
-    type: 'GET_WORKFLOW_INSTANCES_LOADING',
-  });
-
   const searchParams = new URLSearchParams(window.location.search);
 
   var filtersInQuerystring = {};
@@ -33,7 +29,7 @@ const getWorkflowInstances = () => async dispatch => {
   dispatch(getStatistics());
 
   dispatch({
-    type: 'GET_WORKFLOW_INSTANCES_FINISHED',
+    type: 'GET_WORKFLOW_INSTANCES',
     payload,
   });
 };

@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/extend-expect';
-import {getBatchOperations, createOperation, createBatchOperation} from './index';
+import {getOperations, createOperation, createBatchOperation} from './index';
 
 const mockResponse = (status, response) => {
   return new window.Response(response, {
@@ -12,16 +12,13 @@ const mockResponse = (status, response) => {
 
 test('getBatchOperations', async () => {
   var mockDispatch = jest.fn();
-  window.fetch = jest.fn().mockImplementation(() => Promise.resolve(mockResponse(200, '{"test":123}')));
+  window.fetch = jest.fn().mockImplementation(() => Promise.resolve(mockResponse(200, '[]')));
 
-  await getBatchOperations()(mockDispatch);
+  await getOperations()(mockDispatch);
 
   expect(mockDispatch).toHaveBeenNthCalledWith(1, {
-    type: 'GET_OPERATIONS_LOADING',
-  });
-  expect(mockDispatch).toHaveBeenNthCalledWith(2, {
-    type: 'GET_OPERATIONS_FINISHED',
-    payload: {test: 123},
+    type: 'GET_OPERATIONS',
+    payload: [],
   });
 });
 test('createOperation', async () => {
@@ -32,6 +29,7 @@ test('createOperation', async () => {
 
   expect(mockDispatch).toHaveBeenNthCalledWith(1, {
     type: 'CREATE_OPERATION',
+    payload: {test: 123},
   });
 });
 

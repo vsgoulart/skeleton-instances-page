@@ -16,17 +16,17 @@ test('RETRY_OPERATION', async () => {
 });
 
 test('CREATE_BATCH_OPREATION', async () => {
-  var currentState = {operations: [{id: 1}, {id: 2}]};
-  var state = operationsReducer(currentState, {type: 'CREATE_BATCH_OPREATION'});
+  var currentState = [{id: 1}, {id: 2}];
+  var state = operationsReducer(currentState, {type: 'CREATE_BATCH_OPREATION', payload: {id: 4}});
 
-  expect(state).toEqual(currentState);
+  expect(state).toEqual([{id: 4}, {id: 1}, {id: 2}]);
 });
 
 test('GET_OPERATIONS: should return state correctly', async () => {
   var currentState = {operations: [{id: 1}, {id: 2}]};
 
   var state = operationsReducer(currentState, {
-    type: 'GET_OPERATIONS_FINISHED',
+    type: 'GET_OPERATIONS',
     payload: [
       {id: 1, endDate: '2020-12-12'},
       {id: 2, endDate: '2020-12-12'},
@@ -34,13 +34,9 @@ test('GET_OPERATIONS: should return state correctly', async () => {
     ],
   });
 
-  expect(state).toEqual({
-    operations: [
-      {id: 1, endDate: '2020-12-12'},
-      {id: 2, endDate: '2020-12-12'},
-      {id: 3, endDate: null},
-    ],
-    active: [3],
-    isLoading: false,
-  });
+  expect(state).toEqual([
+    {id: 1, endDate: '2020-12-12'},
+    {id: 2, endDate: '2020-12-12'},
+    {id: 3, endDate: null},
+  ]);
 });

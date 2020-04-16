@@ -6,7 +6,7 @@ export default (state = [], action) => {
     case 'CREATE_BATCH_OPREATION': {
       return [action.payload, ...state];
     }
-    case 'GET_OPERATIONS_FINISHED': {
+    case 'GET_OPERATIONS': {
       return action.payload;
     }
     default:

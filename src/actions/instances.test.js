@@ -13,15 +13,14 @@ const mockResponse = (status, response) => {
 };
 test('getWorkflowInstances', async () => {
   var mockDispatch = jest.fn();
-  window.fetch = jest.fn().mockImplementation(() => Promise.resolve(mockResponse(200, '{"test":123}')));
+  window.fetch = jest
+    .fn()
+    .mockImplementation(() => Promise.resolve(mockResponse(200, '{"test":123, "workflowInstances": []}')));
 
   await getWorkflowInstances()(mockDispatch);
 
-  expect(mockDispatch).toHaveBeenNthCalledWith(1, {
-    type: 'GET_WORKFLOW_INSTANCES_LOADING',
-  });
   expect(mockDispatch).toHaveBeenNthCalledWith(2, {
-    type: 'GET_WORKFLOW_INSTANCES_FINISHED',
-    payload: {test: 123},
+    type: 'GET_WORKFLOW_INSTANCES',
+    payload: {test: 123, workflowInstances: []},
   });
 });

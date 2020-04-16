@@ -30,8 +30,9 @@ function Table({
     createOperation({id: id, type: type});
   }
 
-  function onCreateBatchOperation(id, type) {
-    setInstancesAsActive(selectedIds);
+  function onCreateBatchOperation(type) {
+    const selectedIdList = areAllIdsSelected ? workflowInstances.map(({id}) => id) : selectedIds;
+    setInstancesAsActive(selectedIdList);
     createBatchOperation({ids: selectedIds, type: type});
   }
 
@@ -85,7 +86,6 @@ function Table({
                 <td>{startDate}</td>
                 <td>{endDate}</td>
                 <td>
-                  {console.log(hasActiveOperation)}
                   {hasActiveOperation && 'Loading...'}
                   {STATE.INCIDENT === state && (
                     <button onClick={() => onCreateOperation(id, 'RETRY_WORKFLOW_INSTANCE')} type="button">
@@ -127,11 +127,10 @@ function Table({
 }
 
 const mapStateToProps = state => {
-  const {instances} = state;
-
+  const {instances, totalCount} = state.instances;
   return {
-    workflowInstances: instances.instances,
-    totalInstanceCount: instances.totalCount,
+    workflowInstances: instances,
+    totalInstanceCount: totalCount,
   };
 };
 export default connect(mapStateToProps, {

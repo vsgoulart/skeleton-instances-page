@@ -11,13 +11,13 @@ const createOperation = operation => async dispatch => {
     body: JSON.stringify({operationType: operation.type}),
   }).then(response => response.json());
 
-  dispatch(pollOperations);
-  dispatch(pollInstances);
-
   dispatch({
     type: 'CREATE_OPERATION',
     payload,
   });
+
+  dispatch(pollOperations);
+  dispatch(pollInstances);
 };
 
 const createBatchOperation = operation => async dispatch => {
@@ -41,20 +41,16 @@ const createBatchOperation = operation => async dispatch => {
     }),
   }).then(response => response.json());
 
-  dispatch(pollOperations);
-  dispatch(pollInstances);
-
   dispatch({
     type: 'CREATE_BATCH_OPREATION',
     payload,
   });
+
+  dispatch(pollOperations);
+  dispatch(pollInstances);
 };
 
 const getOperations = () => async dispatch => {
-  dispatch({
-    type: 'GET_OPERATIONS_LOADING',
-  });
-
   const payload = await fetch('/api/batch-operations', {
     method: 'POST',
     headers: {
@@ -68,7 +64,7 @@ const getOperations = () => async dispatch => {
   }
 
   dispatch({
-    type: 'GET_OPERATIONS_FINISHED',
+    type: 'GET_OPERATIONS',
     payload,
   });
 };
