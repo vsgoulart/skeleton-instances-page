@@ -2,20 +2,14 @@ import '@testing-library/jest-dom/extend-expect';
 import operationsReducer from './operationsReducer';
 jest.mock('axios');
 
-test('CANCEL_OPERATION: state should not be changed', async () => {
-  var currentState = {operations: [{id: 1}, {id: 2}]};
-  var state = operationsReducer(currentState, {type: 'CANCEL_OPERATION'});
+test('CREATE_OPERATION: new operation should be added on top of list', async () => {
+  var currentState = [{id: 1}, {id: 2}];
+  var state = operationsReducer(currentState, {type: 'CREATE_OPERATION', payload: {id: 3}});
 
-  expect(state).toEqual(currentState);
+  expect(state).toEqual([{id: 3}, {id: 1}, {id: 2}]);
 });
 
-test('RETRY_OPERATION', async () => {
-  var currentState = {operations: [{id: 1}, {id: 2}]};
-  var state = operationsReducer(currentState, {type: 'RETRY_OPERATION'});
-  expect(state).toEqual(currentState);
-});
-
-test('CREATE_BATCH_OPREATION', async () => {
+test('CREATE_BATCH_OPREATION: new operation should be added on top of list', async () => {
   var currentState = [{id: 1}, {id: 2}];
   var state = operationsReducer(currentState, {type: 'CREATE_BATCH_OPREATION', payload: {id: 4}});
 

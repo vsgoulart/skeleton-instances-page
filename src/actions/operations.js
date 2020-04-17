@@ -69,10 +69,14 @@ const getOperations = () => async dispatch => {
   });
 };
 
-const pollOperations = throttle(dispatch => {
-  setTimeout(() => {
-    dispatch(getOperations());
-  }, 5000);
-}, 5000);
+const pollOperations = throttle(
+  dispatch => {
+    setTimeout(() => {
+      dispatch(getOperations());
+    }, 5000);
+  },
+  5000,
+  {trailing: false},
+);
 
-export {createOperation, createBatchOperation, getOperations};
+export {createOperation, createBatchOperation, getOperations, pollOperations};

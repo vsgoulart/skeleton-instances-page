@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/extend-expect';
-import {getOperations, createOperation, createBatchOperation} from './index';
+import {getOperations, createOperation, createBatchOperation, pollOperations, pollInstances} from './index';
 
 const mockResponse = (status, response) => {
   return new window.Response(response, {
@@ -9,28 +9,20 @@ const mockResponse = (status, response) => {
     },
   });
 };
-
-test('getBatchOperations', async () => {
-  var mockDispatch = jest.fn();
-  window.fetch = jest.fn().mockImplementation(() => Promise.resolve(mockResponse(200, '[]')));
-
-  await getOperations()(mockDispatch);
-
-  expect(mockDispatch).toHaveBeenNthCalledWith(1, {
-    type: 'GET_OPERATIONS',
-    payload: [],
-  });
-});
 test('createOperation', async () => {
   var mockDispatch = jest.fn();
   window.fetch = jest.fn().mockImplementation(() => Promise.resolve(mockResponse(200, '{"test":123}')));
 
   await createOperation({id: 1})(mockDispatch);
 
+  expect(mockDispatch).toHaveBeenCalledTimes(3);
+
   expect(mockDispatch).toHaveBeenNthCalledWith(1, {
     type: 'CREATE_OPERATION',
     payload: {test: 123},
   });
+  expect(mockDispatch).toHaveBeenNthCalledWith(2, pollOperations);
+  expect(mockDispatch).toHaveBeenNthCalledWith(3, pollInstances);
 });
 
 test('createBatchOperation', async () => {
@@ -39,8 +31,40 @@ test('createBatchOperation', async () => {
 
   await createBatchOperation({ids: [1], type: 'type'})(mockDispatch);
 
+  expect(mockDispatch).toHaveBeenCalledTimes(3);
   expect(mockDispatch).toHaveBeenNthCalledWith(1, {
     type: 'CREATE_BATCH_OPREATION',
     payload: {test: 123},
+  });
+  expect(mockDispatch).toHaveBeenNthCalledWith(2, pollOperations);
+  expect(mockDispatch).toHaveBeenNthCalledWith(3, pollInstances);
+});
+
+test('getOperations: do not poll', async () => {
+  var mockDispatch = jest.fn();
+  window.fetch = jest
+    .fn()
+    .mockImplementation(() => Promise.resolve(mockResponse(200, '[{"id":1, "endDate":"2020-12-12"}]')));
+
+  await getOperations()(mockDispatch);
+
+  expect(mockDispatch).toHaveBeenCalledTimes(1);
+  expect(mockDispatch).toHaveBeenNthCalledWith(1, {
+    type: 'GET_OPERATIONS',
+    payload: [{id: 1, endDate: '2020-12-12'}],
+  });
+});
+
+test('getOperations: poll', async () => {
+  var mockDispatch = jest.fn();
+  window.fetch = jest.fn().mockImplementation(() => Promise.resolve(mockResponse(200, '[{"id":1, "endDate":null}]')));
+
+  await getOperations()(mockDispatch);
+
+  expect(mockDispatch).toHaveBeenCalledTimes(2);
+  expect(mockDispatch).toHaveBeenNthCalledWith(1, pollOperations);
+  expect(mockDispatch).toHaveBeenNthCalledWith(2, {
+    type: 'GET_OPERATIONS',
+    payload: [{id: 1, endDate: null}],
   });
 });

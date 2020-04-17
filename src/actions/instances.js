@@ -2,10 +2,10 @@ import throttle from 'lodash.throttle';
 
 import {getStatistics} from './statistics';
 
-const setInstancesAsActive = ids => async (dispatch, getState) => {
+const setInstancesAsActive = ids => async dispatch => {
   dispatch({
     type: 'SET_INSTANCES_AS_ACTIVE',
-    payload: {workflowInstances: getState().instances.instances, activeInstanceIds: ids},
+    payload: ids,
   });
 };
 
@@ -21,11 +21,9 @@ const getWorkflowInstances = () => async dispatch => {
     method: 'POST',
     body: JSON.stringify(filtersInQuerystring),
   }).then(response => response.json());
-
   if (payload.workflowInstances.some(({hasActiveOperation}) => hasActiveOperation)) {
     dispatch(pollInstances);
   }
-
   dispatch(getStatistics());
 
   dispatch({
@@ -34,10 +32,14 @@ const getWorkflowInstances = () => async dispatch => {
   });
 };
 
-const pollInstances = throttle(dispatch => {
-  setTimeout(() => {
-    dispatch(getWorkflowInstances());
-  }, 5000);
-}, 5000);
+const pollInstances = throttle(
+  dispatch => {
+    setTimeout(() => {
+      dispatch(getWorkflowInstances());
+    }, 5000);
+  },
+  5000,
+  {trailing: false},
+);
 
 export {setInstancesAsActive, getWorkflowInstances, pollInstances};
