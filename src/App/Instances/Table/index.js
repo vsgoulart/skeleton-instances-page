@@ -1,18 +1,52 @@
-import React, {useState} from 'react';
+import React, {useEffect} from 'react';
 
 import classNames from './index.module.scss';
-import {INSTANCES} from './mocks';
 import {Pagination} from './Pagination';
+import {useStores} from '../../../hooks/useStores';
+import {observer, useLocalStore} from 'mobx-react';
 
 const STATE = Object.freeze({
   ACTIVE: 'ACTIVE',
   INCIDENT: 'INCIDENT',
 });
 
-function Table() {
-  const [selectedIds, setSelectedIds] = useState([]);
-  const [areAllIdsSelected, setAreAllIdsSelected] = useState(false);
-  const {workflowInstances, totalCount} = INSTANCES;
+const Table = observer(() => {
+  const {instancesStore, operationsStore} = useStores();
+  const {workflowInstances, totalCount} = instancesStore.state;
+
+  useEffect(() => {
+    instancesStore.init();
+
+    return () => {
+      // it is important to reset the store to default when unmounting the component
+      // otherwise it would show the old state on the next mount.
+      instancesStore.reset();
+    };
+  }, [instancesStore]);
+
+  const selection = useLocalStore(() => ({
+    selectedIds: [],
+    setSelectedIds(ids) {
+      selection.selectedIds = ids;
+    },
+    areAllIdsSelected: false,
+    setAreAllIdsSelected(state) {
+      selection.areAllIdsSelected = state;
+    },
+    // this is a computed value deriving state from observables
+    get ids() {
+      return selection.areAllIdsSelected ? [] : selection.selectedIds;
+    },
+  }));
+
+  const handleSingleClick = (instanceId, operationType) => async () => {
+    await operationsStore.createOperation(instanceId, operationType);
+  };
+
+  const handleBatchClick = operationType => async () => {
+    await operationsStore.createBatchOperation(operationType);
+  };
+  const {selectedIds, setSelectedIds, setAreAllIdsSelected, areAllIdsSelected} = selection;
 
   return (
     <>
@@ -39,7 +73,7 @@ function Table() {
           </tr>
         </thead>
         <tbody>
-          {workflowInstances.map(({id, workflowName, state, startDate, endDate}) => (
+          {workflowInstances.map(({id, workflowName, state, startDate, endDate, hasActiveOperation}) => (
             <tr key={id}>
               <td>
                 <input
@@ -63,18 +97,37 @@ function Table() {
               <td>{startDate}</td>
               <td>{endDate}</td>
               <td>
-                {STATE.INCIDENT === state && <button type="button">Retry</button>}
-                <button type="button">Cancel</button>
+                {STATE.INCIDENT === state && (
+                  <button type="button" onClick={handleSingleClick(id, 'RESOLVE_INCIDENT')}>
+                    Retry
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleSingleClick(id, 'CANCEL_WORKFLOW_INSTANCE')}
+                  data-testid="cancel-button"
+                >
+                  Cancel
+                </button>
+                {hasActiveOperation && ' L'}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
       <div>
-        <button type="button" disabled={!areAllIdsSelected && selectedIds.length === 0}>
+        <button
+          type="button"
+          disabled={!areAllIdsSelected && selectedIds.length === 0}
+          onClick={handleBatchClick('RESOLVE_INCIDENT')}
+        >
           Retry
         </button>
-        <button type="button" disabled={!areAllIdsSelected && selectedIds.length === 0}>
+        <button
+          type="button"
+          disabled={!areAllIdsSelected && selectedIds.length === 0}
+          onClick={handleBatchClick('CANCEL_WORKFLOW_INSTANCE')}
+        >
           Cancel
         </button>
         <Pagination
@@ -86,6 +139,6 @@ function Table() {
       </div>
     </>
   );
-}
+});
 
 export {Table};

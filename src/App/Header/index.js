@@ -1,10 +1,33 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Link, NavLink} from 'react-router-dom';
 import cns from 'classnames';
-
+import {Observer, useLocalStore, observer} from 'mobx-react';
+import {useStores} from '../../hooks/useStores';
 import classNames from './index.module.scss';
 
-function Header() {
+const Header = observer(() => {
+  const {instancesStore, filterStore, statisticsStore} = useStores();
+
+  useEffect(() => {
+    statisticsStore.init();
+
+    return () => {
+      statisticsStore.reset();
+    };
+  }, [statisticsStore]);
+
+  // could also be moved to filterStore?
+  const filter = useLocalStore(() => ({
+    get isInstancesActive() {
+      const {active, incidents} = filterStore.state;
+      return active && !incidents;
+    },
+    get isIncidentsActive() {
+      const {active, incidents} = filterStore.state;
+      return !active && incidents;
+    },
+  }));
+
   return (
     <nav className={classNames.header}>
       <Link to="/" className={cns(classNames.logo, classNames.link)}>
@@ -20,44 +43,32 @@ function Header() {
           <NavLink
             to="/instances?active=true"
             exact
-            isActive={(match, location) => {
-              const searchParams = new URLSearchParams(location.search);
-
-              return (
-                match !== null && searchParams.get('incidents') !== 'true' && searchParams.get('active') === 'true'
-              );
-            }}
+            isActive={() => filter.isInstancesActive}
             className={classNames.link}
             activeClassName={classNames.activeLink}
           >
-            Running Instances <span>0</span>
+            Running Instances <span>{statisticsStore.state.instances}</span>
           </NavLink>
         </li>
         <li className={classNames.linkContainer}>
           <NavLink to="/instances" exact className={classNames.link} activeClassName={classNames.activeLink}>
-            Filters <span>0</span>
+            Filters <Observer>{() => <span>{instancesStore.state.totalCount}</span>}</Observer>
           </NavLink>
         </li>
         <li className={classNames.linkContainer}>
           <NavLink
             to="/instances?incidents=true"
             exact
-            isActive={(match, location) => {
-              const searchParams = new URLSearchParams(location.search);
-
-              return (
-                match !== null && searchParams.get('incidents') === 'true' && searchParams.get('active') !== 'true'
-              );
-            }}
+            isActive={() => filter.isIncidentsActive}
             className={classNames.link}
             activeClassName={classNames.activeLink}
           >
-            Incidents <span>0</span>
+            Incidents <span>{statisticsStore.state.incidents}</span>
           </NavLink>
         </li>
       </ul>
     </nav>
   );
-}
+});
 
 export {Header};
