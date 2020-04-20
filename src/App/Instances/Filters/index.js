@@ -1,23 +1,19 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {useLocation, useHistory} from 'react-router-dom';
+import {connect} from 'react-redux';
 
 import classNames from './index.module.scss';
-import {ENDPOINTS} from '../../endpoints';
 
+import {getWorkflowInstances, getGroupedWorkflows} from '../../../actions';
 const PARAMS = ['workflow', 'version', 'ids', 'errorMessage', 'startDate', 'endDate', 'active', 'incidents'];
 
-function Filters() {
+function Filters({totalInstanceCount, getWorkflowInstances, getGroupedWorkflows, workflows}) {
   const {workflow, version, ids, errorMessage, startDate, endDate, active, incidents} = useSearchParams(PARAMS);
   const history = useHistory();
-  const [workflows, setWorkflows] = useState([]);
 
   useEffect(() => {
-    async function fetchWorkflows() {
-      setWorkflows(await fetch(ENDPOINTS.workflows).then(response => response.json()));
-    }
-
-    fetchWorkflows();
-  }, []);
+    getGroupedWorkflows();
+  }, [getGroupedWorkflows]);
 
   function updateParam(name, value) {
     const searchParams = new URLSearchParams(window.location.search);
@@ -29,16 +25,18 @@ function Filters() {
     }
 
     history.push({search: searchParams.toString()});
+    getWorkflowInstances();
   }
 
   return (
     <div className={classNames.filters}>
       <h2>
-        Filters <span>0</span>
+        Filters <span data-testid={'filtersCount'}>{totalInstanceCount}</span>
       </h2>
       <label htmlFor="workflow" className={classNames.label}>
         <span className={classNames.labelText}>Workflow</span>
         <select
+          data-testid="workflows"
           name="workflow"
           id="workflow"
           value={workflow}
@@ -86,6 +84,7 @@ function Filters() {
       <label htmlFor="errorMessage" className={classNames.label}>
         <span className={classNames.labelText}>Error message</span>
         <input
+          data-testid="errorMessage"
           type="text"
           name="errorMessage"
           id="errorMessage"
@@ -179,3 +178,10 @@ function getVersions(workflows, id) {
 }
 
 export {Filters};
+const mapStateToProps = (state, ownProps) => {
+  return {
+    totalInstanceCount: state.instances.totalCount,
+    workflows: state.workflows,
+  };
+};
+export default connect(mapStateToProps, {getWorkflowInstances, getGroupedWorkflows})(Filters);

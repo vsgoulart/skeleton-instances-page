@@ -1,10 +1,15 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Link, NavLink} from 'react-router-dom';
 import cns from 'classnames';
+import {getStatistics} from '../../actions';
+import {connect} from 'react-redux';
 
 import classNames from './index.module.scss';
+export function Header({getStatistics, statistics, totalInstanceCount}) {
+  useEffect(() => {
+    getStatistics();
+  }, [getStatistics]);
 
-function Header() {
   return (
     <nav className={classNames.header}>
       <Link to="/" className={cns(classNames.logo, classNames.link)}>
@@ -30,12 +35,12 @@ function Header() {
             className={classNames.link}
             activeClassName={classNames.activeLink}
           >
-            Running Instances <span>0</span>
+            Running Instances <span data-testid="running">{statistics.running}</span>
           </NavLink>
         </li>
         <li className={classNames.linkContainer}>
           <NavLink to="/instances" exact className={classNames.link} activeClassName={classNames.activeLink}>
-            Filters <span>0</span>
+            Filters <span data-testid="filters">{totalInstanceCount ? totalInstanceCount : statistics.running}</span>
           </NavLink>
         </li>
         <li className={classNames.linkContainer}>
@@ -52,12 +57,17 @@ function Header() {
             className={classNames.link}
             activeClassName={classNames.activeLink}
           >
-            Incidents <span>0</span>
+            Incidents <span data-testid="withIncidents">{statistics.withIncidents}</span>
           </NavLink>
         </li>
       </ul>
     </nav>
   );
 }
-
-export {Header};
+const mapStateToProps = (state, ownProps) => {
+  return {
+    statistics: state.statistics.statistics,
+    totalInstanceCount: state.instances.totalCount,
+  };
+};
+export default connect(mapStateToProps, {getStatistics})(Header);

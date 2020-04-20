@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`has correct title 1`] = `
+<DocumentFragment>
+  <div
+    class="operations"
+  >
+    <h2>
+      Operations
+    </h2>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`lists operations 1`] = `
+<DocumentFragment>
+  <div
+    class="operations"
+  >
+    <h2>
+      Operations
+    </h2>
+    <div
+      class="operation"
+      data-testid="operation-1"
+    >
+      <div>
+        1
+      </div>
+      <div>
+        2020-01-01
+      </div>
+      <div>
+        2020-01-02
+      </div>
+      <div>
+        10 / 10
+      </div>
+    </div>
+    <div
+      class="operation"
+      data-testid="operation-2"
+    >
+      <div>
+        2
+      </div>
+      <div>
+        2020-02-01
+      </div>
+      <div>
+        2020-02-02
+      </div>
+      <div>
+        20 / 20
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
