@@ -102,7 +102,11 @@ const Table = observer(() => {
                     Retry
                   </button>
                 )}
-                <button type="button" onClick={handleSingleClick(id, 'CANCEL_WORKFLOW_INSTANCE')}>
+                <button
+                  type="button"
+                  onClick={handleSingleClick(id, 'CANCEL_WORKFLOW_INSTANCE')}
+                  data-testid="cancel-button"
+                >
                   Cancel
                 </button>
                 {hasActiveOperation && ' L'}
