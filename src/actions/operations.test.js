@@ -68,3 +68,19 @@ test('getOperations: poll', async () => {
     payload: [{id: 1, endDate: null}],
   });
 });
+
+test('pollOperations', async () => {
+  jest.useFakeTimers();
+
+  var mockDispatch = jest.fn();
+  window.fetch = jest.fn().mockImplementation(() => Promise.resolve(mockResponse(200, '{}')));
+
+  pollOperations(mockDispatch);
+  pollOperations(mockDispatch);
+  pollOperations(mockDispatch);
+  pollOperations(mockDispatch);
+  pollOperations(mockDispatch);
+  jest.advanceTimersByTime(5000);
+
+  expect(mockDispatch).toHaveBeenCalledTimes(1);
+});

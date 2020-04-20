@@ -1,4 +1,4 @@
-export default (state = {instances: [], groupedWorkflows: []}, action) => {
+export default (state = {instances: [], groupedWorkflows: [], totalCount: 0}, action) => {
   switch (action.type) {
     case 'SET_INSTANCES_AS_ACTIVE': {
       const activeInstanceIds = action.payload;

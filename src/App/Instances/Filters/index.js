@@ -31,11 +31,12 @@ function Filters({totalInstanceCount, getWorkflowInstances, getGroupedWorkflows,
   return (
     <div className={classNames.filters}>
       <h2>
-        Filters <span>{totalInstanceCount}</span>
+        Filters <span data-testid={'filtersCount'}>{totalInstanceCount}</span>
       </h2>
       <label htmlFor="workflow" className={classNames.label}>
         <span className={classNames.labelText}>Workflow</span>
         <select
+          data-testid="workflows"
           name="workflow"
           id="workflow"
           value={workflow}
@@ -83,6 +84,7 @@ function Filters({totalInstanceCount, getWorkflowInstances, getGroupedWorkflows,
       <label htmlFor="errorMessage" className={classNames.label}>
         <span className={classNames.labelText}>Error message</span>
         <input
+          data-testid="errorMessage"
           type="text"
           name="errorMessage"
           id="errorMessage"

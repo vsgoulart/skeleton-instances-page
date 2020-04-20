@@ -25,7 +25,6 @@ const getWorkflowInstances = () => async dispatch => {
     dispatch(pollInstances);
   }
   dispatch(getStatistics());
-
   dispatch({
     type: 'GET_WORKFLOW_INSTANCES',
     payload,

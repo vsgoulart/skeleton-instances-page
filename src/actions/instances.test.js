@@ -1,11 +1,6 @@
 import '@testing-library/jest-dom/extend-expect';
 import {setInstancesAsActive, getWorkflowInstances, pollInstances} from './instances';
-import configureMockStore from 'redux-mock-store';
-import thunk from 'redux-thunk';
-import {getStatistics} from './statistics';
-
-const middlewares = [thunk];
-const mockStore = configureMockStore(middlewares);
+// import {getStatistics} from './statistics';
 
 const mockResponse = (status, response) => {
   return new window.Response(response, {
@@ -72,4 +67,20 @@ test('getWorkflowInstances: active operations', async () => {
     type: 'GET_WORKFLOW_INSTANCES',
     payload: {workflowInstances: workflowInstances},
   });
+});
+
+test('pollInstances', async () => {
+  jest.useFakeTimers();
+
+  var mockDispatch = jest.fn();
+  window.fetch = jest.fn().mockImplementation(() => Promise.resolve(mockResponse(200, '{}')));
+
+  pollInstances(mockDispatch);
+  pollInstances(mockDispatch);
+  pollInstances(mockDispatch);
+  pollInstances(mockDispatch);
+  pollInstances(mockDispatch);
+  jest.advanceTimersByTime(5000);
+
+  expect(mockDispatch).toHaveBeenCalledTimes(1);
 });

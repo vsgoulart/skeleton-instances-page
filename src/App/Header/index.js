@@ -5,8 +5,7 @@ import {getStatistics} from '../../actions';
 import {connect} from 'react-redux';
 
 import classNames from './index.module.scss';
-
-function Header({getStatistics, statistics, totalInstanceCount}) {
+export function Header({getStatistics, statistics, totalInstanceCount}) {
   useEffect(() => {
     getStatistics();
   }, [getStatistics]);
@@ -36,12 +35,12 @@ function Header({getStatistics, statistics, totalInstanceCount}) {
             className={classNames.link}
             activeClassName={classNames.activeLink}
           >
-            Running Instances <span>{statistics.running}</span>
+            Running Instances <span data-testid="running">{statistics.running}</span>
           </NavLink>
         </li>
         <li className={classNames.linkContainer}>
           <NavLink to="/instances" exact className={classNames.link} activeClassName={classNames.activeLink}>
-            Filters <span>{totalInstanceCount ? totalInstanceCount : statistics.running}</span>
+            Filters <span data-testid="filters">{totalInstanceCount ? totalInstanceCount : statistics.running}</span>
           </NavLink>
         </li>
         <li className={classNames.linkContainer}>
@@ -58,7 +57,7 @@ function Header({getStatistics, statistics, totalInstanceCount}) {
             className={classNames.link}
             activeClassName={classNames.activeLink}
           >
-            Incidents <span>{statistics.withIncidents}</span>
+            Incidents <span data-testid="withIncidents">{statistics.withIncidents}</span>
           </NavLink>
         </li>
       </ul>

@@ -10,7 +10,7 @@ const STATE = Object.freeze({
   INCIDENT: 'INCIDENT',
 });
 
-function Table({
+export function Table({
   createOperation,
   getWorkflowInstances,
   workflowInstances,
@@ -33,7 +33,7 @@ function Table({
   function onCreateBatchOperation(type) {
     const selectedIdList = areAllIdsSelected ? workflowInstances.map(({id}) => id) : selectedIds;
     setInstancesAsActive(selectedIdList);
-    createBatchOperation({ids: selectedIds, type: type});
+    createBatchOperation({ids: selectedIdList, type: type});
   }
 
   return (
@@ -45,6 +45,7 @@ function Table({
             <th>
               <input
                 type="checkbox"
+                data-testid="checkAll"
                 checked={areAllIdsSelected}
                 onChange={event => {
                   setAreAllIdsSelected(event.target.checked);
@@ -63,9 +64,10 @@ function Table({
         <tbody>
           {workflowInstances &&
             workflowInstances.map(({id, workflowName, state, startDate, endDate, hasActiveOperation}) => (
-              <tr key={id}>
+              <tr data-testid={`workflow-${id}`} key={id}>
                 <td>
                   <input
+                    data-testid={'check'}
                     type="checkbox"
                     checked={selectedIds.includes(id) || areAllIdsSelected}
                     onChange={event => {
@@ -88,11 +90,19 @@ function Table({
                 <td>
                   {hasActiveOperation && 'Loading...'}
                   {STATE.INCIDENT === state && (
-                    <button onClick={() => onCreateOperation(id, 'RETRY_WORKFLOW_INSTANCE')} type="button">
+                    <button
+                      data-testid={'retry-operation'}
+                      onClick={() => onCreateOperation(id, 'RETRY_WORKFLOW_INSTANCE')}
+                      type="button"
+                    >
                       Retry
                     </button>
                   )}
-                  <button onClick={() => onCreateOperation(id, 'CANCEL_WORKFLOW_INSTANCE')} type="button">
+                  <button
+                    data-testid={'cancel-operation'}
+                    onClick={() => onCreateOperation(id, 'CANCEL_WORKFLOW_INSTANCE')}
+                    type="button"
+                  >
                     Cancel
                   </button>
                 </td>
@@ -102,6 +112,7 @@ function Table({
       </table>
       <div>
         <button
+          data-testid={'batch-operation-retry'}
           type="button"
           onClick={() => onCreateBatchOperation('RETRY_WORKFLOW_INSTANCE')}
           disabled={!areAllIdsSelected && selectedIds.length === 0}
@@ -109,6 +120,7 @@ function Table({
           Retry
         </button>
         <button
+          data-testid={'batch-operation-cancel'}
           type="button"
           onClick={() => onCreateBatchOperation('CANCEL_WORKFLOW_INSTANCE')}
           disabled={!areAllIdsSelected && selectedIds.length === 0}
