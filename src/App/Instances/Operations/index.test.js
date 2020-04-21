@@ -2,6 +2,7 @@ import React from 'react';
 import {render, waitForElementToBeRemoved} from '@testing-library/react';
 
 import {Operations} from './index';
+import {createOperation} from '../../../stores/operations';
 
 const MOCK_FINISHED_OPERATION = Object.freeze({
   id: '510421d6-4b07-4662-9639-a0f23e62940a',
@@ -42,6 +43,15 @@ describe('<Operations />', () => {
     const {findByText} = render(<Operations />);
 
     expect(await findByText(MOCK_FINISHED_OPERATION.id)).toBeInTheDocument();
+  });
+
+  it('should show a new active operation', async () => {
+    fetch.once(JSON.stringify([])).once(JSON.stringify(MOCK_ACTIVE_OPERATION), {status: 200});
+    const {findByText} = render(<Operations />);
+
+    createOperation({id: 1, operationType: 'CANCEL_WORKFLOW_INSTANCE'});
+
+    expect(await findByText(MOCK_ACTIVE_OPERATION.id)).toBeInTheDocument();
   });
 
   // this test doesn't work because of some Jest limitations
