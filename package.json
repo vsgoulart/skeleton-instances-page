@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.3.2",
+    "@testing-library/jest-dom": "^5.5.0",
+    "@testing-library/react": "^10.0.2",
     "@testing-library/user-event": "^7.1.2",
     "classnames": "^2.2.6",
     "effector": "^20.13.5",
@@ -20,7 +20,8 @@
     "start": "concurrently \"yarn:start:frontend\" \"yarn:start:backend\"",
     "start:frontend": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "react-scripts test --env=jest-environment-jsdom-sixteen",
+    "coverage": "react-scripts test --env=jest-environment-jsdom-sixteen --coverage",
     "eject": "react-scripts eject",
     "start:backend": "nodemon server/index.js --watch server/"
   },
@@ -42,6 +43,8 @@
   "devDependencies": {
     "@koa/router": "^8.0.8",
     "concurrently": "^5.1.0",
+    "jest-environment-jsdom-sixteen": "^1.0.3",
+    "jest-fetch-mock": "^3.0.3",
     "koa": "^2.11.0",
     "koa-bodyparser": "^4.3.0",
     "koa-logger": "^3.2.1",

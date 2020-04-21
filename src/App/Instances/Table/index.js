@@ -76,7 +76,7 @@ function Table() {
           )}
           {!isLoading &&
             instances.map(({id, workflowName, state, startDate, endDate, hasActiveOperation}) => (
-              <tr key={id}>
+              <tr key={id} data-testid={`row-${id}`}>
                 <td>
                   <input
                     type="checkbox"
